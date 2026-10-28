@@ -80,3 +80,4 @@ Untuk mengaktifkan fitur ringkasan & notulen otomatis berbasis AI:
 - **Google Fonts** (*Plus Jakarta Sans* & *Tinos*)
 - **Web Speech API & MediaRecorder API**
 - **Google Gemini 2.5 Flash / 1.5 Flash API**
+
