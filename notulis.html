@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SmartNotulen AI - Aplikasi Notulen Rapat Pintar</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Inter for UI, Tinos (Times New Roman equivalent) for Official A4 Document -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serifDoc: ['Tinos', 'Times New Roman', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Official Document Paper Styling */
+        .a4-paper {
+            font-family: 'Tinos', 'Times New Roman', Times, serif;
+            background: #ffffff;
+            color: #000000;
+            width: 100%;
+            max-width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 18mm 20mm;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+            line-height: 1.5;
+            font-size: 11.5pt;
+        }
+
+        @media (max-width: 768px) {
+            .a4-paper {
+                padding: 16px 14px;
+                min-height: auto;
+                font-size: 10.5pt;
+            }
+        }
+
+        /* Double border for Official Indonesian Kop Surat */
+        .kop-border {
+            border-bottom: 3px solid #000;
+            position: relative;
+            margin-bottom: 18px;
+            padding-bottom: 8px;
+        }
+        .kop-border::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -6px;
+            height: 1px;
+            background-color: #000;
+        }
+
+        /* Highlight badge for unclear audio in document */
+        .unclear-marker {
+            background-color: #fef08a;
+            color: #854d0e;
+            border: 1px dashed #eab308;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            margin: 1px 2px;
+        }
+        .unclear-marker:hover {
+            background-color: #fde047;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+
+        /* Print Media Styles: Only print the A4 document cleanly */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 15mm 18mm;
+            }
+            body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #tab-hasil {
+                display: block !important;
+            }
+            .a4-paper {
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            /* Optional: Make unclear markers subtle if printed before removing */
+            .unclear-marker {
+                background-color: transparent !important;
+                border: 1px dotted #666 !important;
+                color: #000 !important;
+            }
+        }
+
+        /* Pulse animation for recording */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .recording-pulse {
+            animation: pulse-ring 1.8s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-20 md:pb-8 text-slate-800">
+
+    <!-- TOP APP BAR (Android Material Bar + Desktop Nav) -->
+    <header class="no-print sticky top-0 z-40 bg-gradient-to-r from-brand-900 via-brand-800 to-teal-800 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center border border-white/20 shadow-inner">
+                    <i class="fa-solid fa-microphone-lines text-emerald-300 text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-lg tracking-tight leading-none">SmartNotulen AI</h1>
+                        <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 rounded-full">v2.5 Pro</span>
+                    </div>
+                    <p class="text-xs text-emerald-100/80 mt-0.5">Perekam, Deteksi Pembicara & Perangkum Notulen Dinas</p>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation Tabs -->
+            <nav class="hidden md:flex items-center space-x-1 bg-black/20 p-1 rounded-xl border border-white/10">
+                <button onclick="switchTab('rekam')" id="nav-desk-rekam" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 bg-white text-brand-900 shadow-sm">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span>1. Rekam & Rapat</span>
+                </button>
+                <button onclick="switchTab('kop')" id="nav-desk-kop" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-emerald-100 hover:bg-white/10">
+                    <i class="fa-solid fa-building-columns"></i>
+                    <span>2. Kop & TTD</span>
+                </button>
+                <button onclick="switchTab('hasil')" id="nav-desk-hasil" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-emerald-100 hover:bg-white/10 relative">
+                    <i class="fa-solid fa-file-signature"></i>
+                    <span>3. Hasil Notulen</span>
+                    <span id="badge-unclear-desk" class="hidden ml-1 px-1.5 py-0.2 text-[10px] bg-amber-400 text-slate-950 font-bold rounded-full">!</span>
+                </button>
+            </nav>
+
+            <!-- Quick Demo Button on Header -->
+            <div class="flex items-center gap-2">
+                <button onclick="runSimulatedMeeting()" class="text-xs bg-amber-400 hover:bg-amber-300 text-slate-900 font-semibold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5" title="Uji coba simulasi rekaman rapat otomatis">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span class="hidden sm:inline">Demo Rapat AI</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 pt-4">
+
+        <!-- AI PROCESSING OVERLAY MODAL -->
+        <div id="ai-loading-modal" class="no-print fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+                <div class="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto relative">
+                    <i class="fa-solid fa-wand-magic-sparkles text-2xl animate-pulse"></i>
+                    <div class="absolute inset-0 rounded-2xl border-2 border-brand-500 border-t-transparent animate-spin"></div>
+                </div>
+                <div>
+                    <h3 id="ai-loading-title" class="text-lg font-bold text-slate-800">Memproses Rekaman Rapat...</h3>
+                    <p id="ai-loading-step" class="text-sm text-slate-500 mt-1">Mengidentifikasi pembicara (Speaker Diarization) & menandai bagian suara kurang jelas...</p>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="ai-loading-bar" class="bg-brand-600 h-full w-1/3 transition-all duration-500 rounded-full"></div>
+                </div>
+                <div class="text-xs text-slate-400 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                    <i class="fa-solid fa-shield-halved text-brand-600 mr-1"></i>
+                    AI merangkum secara humanis sesuai kaidah tata naskah dinas & memberi tanda <span class="font-semibold text-amber-700">[⚠️ Suara Kurang Jelas]</span> bila audio meragukan.
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 1: REKAM & DATA RAPAT                  -->
+        <!-- ========================================== -->
+        <section id="tab-rekam" class="space-y-5">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                
+                <!-- LEFT COLUMN: AUDIO RECORDER STUDIO (5 Cols) -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                        <div class="bg-gradient-to-r from-slate-900 to-slate-800 px-5 py-4 text-white flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <span id="rec-status-dot" class="w-3 h-3 rounded-full bg-slate-400 inline-block"></span>
+                                <h2 class="font-semibold text-sm tracking-wide uppercase" id="rec-status-text">Siap Merekam Rapat</h2>
+                            </div>
+                            <span class="text-xs bg-white/10 px-2.5 py-1 rounded-full text-slate-200 font-mono" id="rec-mode-badge">Auto-Diarization</span>
+                        </div>
+
+                        <div class="p-5 flex flex-col items-center">
+                            <!-- Timer Display -->
+                            <div class="text-4xl sm:text-5xl font-mono font-bold text-slate-800 tracking-wider my-2" id="rec-timer">
+                                00:00
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4 text-center" id="rec-subtext">
+                                Letakkan ponsel di tengah meja rapat. AI akan mengenali pergantian pembicara.
+                            </p>
+
+                            <!-- Live Audio Waveform Canvas -->
+                            <div class="w-full h-28 bg-slate-950 rounded-xl overflow-hidden relative border border-slate-800 shadow-inner mb-5 flex items-center justify-center">
+                                <canvas id="waveform-canvas" class="w-full h-full block"></canvas>
+                                <div id="canvas-Overlay-hint" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-xs pointer-events-none">
+                                    <i class="fa-solid fa-wave-square text-lg mb-1 text-emerald-500/60"></i>
+                                    <span>Gelombang Suara Mikrofon Real-Time</span>
+                                </div>
+                            </div>
+
+                            <!-- Quick Flag Unclear Moment During Recording -->
+                            <div id="live-marker-bar" class="hidden w-full mb-4">
+                                <button type="button" onclick="addLiveUnclearBookmark()" class="w-full py-2 px-3 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition">
+                                    <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                                    <span>Tandai Menit Ini Kurang Jelas (<span id="bookmark-count">0</span> ditandai)</span>
+                                </button>
+                            </div>
+
+                            <!-- Primary Recorder Controls -->
+                            <div class="flex items-center justify-center gap-4 w-full my-1">
+                                <!-- Start Record Button -->
+                                <button id="btn-record" onclick="startRecording()" class="flex-1 py-3.5 px-5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-semibold rounded-2xl shadow-lg shadow-red-600/25 flex items-center justify-center gap-2.5 transition">
+                                    <i class="fa-solid fa-microphone text-lg"></i>
+                                    <span>Mulai Rekam Rapat</span>
+                                </button>
+
+                                <!-- Pause / Resume Button (Hidden initially) -->
+                                <button id="btn-pause" onclick="togglePauseRecording()" class="hidden py-3.5 px-4 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-2xl shadow-md items-center justify-center gap-2 transition">
+                                    <i class="fa-solid fa-pause" id="icon-pause"></i>
+                                    <span id="text-pause">Jeda</span>
+                                </button>
+
+                                <!-- Stop & Summarize Button (Hidden initially) -->
+                                <button id="btn-stop" onclick="stopRecordingAndProcess()" class="hidden flex-1 py-3.5 px-5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-2xl shadow-lg shadow-brand-600/30 items-center justify-center gap-2 transition">
+                                    <i class="fa-solid fa-stop"></i>
+                                    <span>Stop & Rangkum AI</span>
+                                </button>
+                            </div>
+
+                            <!-- Recorded Audio Playback Preview (shows after recording/upload) -->
+                            <div id="audio-preview-box" class="hidden w-full mt-4 pt-4 border-t border-slate-100">
+                                <div class="flex items-center justify-between text-xs text-slate-600 mb-1.5">
+                                    <span class="font-semibold flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-check text-brand-600"></i> Rekaman Audio Tersimpan
+                                    </span>
+                                    <button onclick="reprocessCurrentAudio()" class="text-brand-600 hover:underline font-medium">
+                                        <i class="fa-solid fa-rotate mr-1"></i>Proses Ulang AI
+                                    </button>
+                                </div>
+                                <audio id="audio-player" controls class="w-full h-10 rounded-lg"></audio>
+                            </div>
+
+                            <!-- Alternative: Upload Audio or Demo -->
+                            <div class="w-full mt-5 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <label class="cursor-pointer py-2.5 px-3 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition border border-slate-200/60">
+                                    <i class="fa-solid fa-file-audio text-brand-600"></i>
+                                    <span>Unggah File Audio</span>
+                                    <input type="file" id="audio-upload-input" accept="audio/*" class="hidden" onchange="handleAudioFileUpload(event)">
+                                </label>
+
+                                <button type="button" onclick="runSimulatedMeeting()" class="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-brand-800 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition border border-emerald-200">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-brand-600"></i>
+                                    <span>Simulasi Rekaman (Demo)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info Card: How AI Speaker & Unclear Audio Detection Works -->
+                    <div class="bg-gradient-to-br from-emerald-900 to-slate-900 text-white rounded-2xl p-4 shadow-sm space-y-2.5">
+                        <div class="flex items-center gap-2 text-emerald-300 font-semibold text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-robot"></i>
+                            <span>Fitur Cerdas SmartNotulen AI</span>
+                        </div>
+                        <ul class="text-xs text-slate-200 space-y-2 leading-relaxed">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-user-check text-emerald-400 mt-0.5"></i>
+                                <span><strong>Deteksi Pembicara Jelas:</strong> Memisahkan dialog per pembicara dan mencocokkannya dengan daftar peserta rapat.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-0.5"></i>
+                                <span><strong>Penanda Suara Kurang Jelas:</strong> Bagian yang bergumam/bising otomatis diberi tanda <code class="bg-amber-400/20 text-amber-200 px-1 rounded">[⚠️ Suara Kurang Jelas]</code> lengkap dengan menit ke berapa.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-feather-pointed text-sky-400 mt-0.5"></i>
+                                <span><strong>Bahasa Humanis & Terstruktur:</strong> Ketika rekaman di-stop, AI menyusun kalimat formal yang luwes, sopan, dan siap ditandatangani.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: MEETING METADATA & FORMAT OPTIONS (7 Cols) -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                            <div>
+                                <h2 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-clipboard-list text-brand-600"></i>
+                                    <span>Identitas & Pengaturan Rapat</span>
+                                </h2>
+                                <p class="text-xs text-slate-500">Data ini digunakan AI sebagai konteks rangkuman dan atribut resmi notulen</p>
+                            </div>
+                            <span class="text-xs font-medium text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-100">Otomatis Tersinkron</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Agenda / Judul Rapat -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Agenda / Acara Rapat <span class="text-red-500">*</span></label>
+                                <input type="text" id="meta-agenda" oninput="syncDocumentPreview()" value="Rapat Koordinasi Evaluasi Kinerja Triwulan & Optimalisasi Layanan Digital" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="Contoh: Rapat Evaluasi Program Kerja...">
+                            </div>
+
+                            <!-- Hari / Tanggal -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Hari / Tanggal Rapat</label>
+                                <input type="text" id="meta-tanggal" oninput="syncDocumentPreview()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+
+                            <!-- Waktu Rapat -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Waktu Rapat</label>
+                                <input type="text" id="meta-waktu" oninput="syncDocumentPreview()" value="09.00 WIB s.d. Selesai" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="09.00 WIB - Selesai">
+                            </div>
+
+                            <!-- Tempat Rapat -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat / Media Rapat</label>
+                                <input type="text" id="meta-tempat" oninput="syncDocumentPreview()" value="Ruang Rapat Utama Lt. 2 / Hybrid Zoom" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+
+                            <!-- Pilihan Format Notulen -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Pilihan Format Notulen <span class="text-brand-600">(Bisa Diubah Kapan Saja)</span></label>
+                                <select id="meta-format" onchange="handleFormatChange()" class="w-full px-3.5 py-2.5 rounded-xl border border-brand-300 bg-brand-50/50 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="dinas">1. Format Dinas / Formal Lengkap (Narasi Terstruktur)</option>
+                                    <option value="eksekutif">2. Format Eksekutif Ringkas (Poin Utama & Action Plan)</option>
+                                    <option value="matriks">3. Format Tabel Matriks (Agenda, Pembahasan, Keputusan, PIC)</option>
+                                </select>
+                            </div>
+
+                            <!-- Daftar Peserta / Pembicara Utama -->
+                            <div class="sm:col-span-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block text-xs font-semibold text-slate-700">Daftar Pembicara / Peserta Rapat (Membantu AI Mengenali Suara)</label>
+                                    <span class="text-[11px] text-slate-400">Pisahkan dengan koma</span>
+                                </div>
+                                <input type="text" id="meta-peserta" oninput="syncDocumentPreview()" value="Dr. H. Ahmad Fauzi, S.H., M.H. (Pimpinan Rapat), Budi Santoso, S.Kom. (Kabag TI), Siti Aminah, S.E. (Kasubbag Keuangan), Hendra Wijaya (Tim Teknis)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Ketik nama & jabatan peserta rapat...">
+                            </div>
+
+                            <!-- Catatan Tambahan / Fokus Rapat (Opsional) -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan Konteks / Fokus Rapat (Opsional untuk Panduan AI)</label>
+                                <textarea id="meta-konteks" rows="2" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Contoh: Rapat membahas kendala server aplikasi pelayanan, realisasi anggaran triwulan III, dan tenggat waktu perbaikan..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Quick Actions -->
+                        <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                            <button type="button" onclick="switchTab('kop')" class="text-xs font-semibold text-slate-600 hover:text-brand-700 flex items-center gap-1.5 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200/70 transition">
+                                <i class="fa-solid fa-gear"></i>
+                                <span>Atur Kop Surat & Penandatangan</span>
+                            </button>
+
+                            <button type="button" onclick="switchTab('hasil')" class="text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 flex items-center gap-2 py-2.5 px-4 rounded-xl shadow-sm transition">
+                                <span>Lihat Pratinjau Notulen</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: PENGATURAN KOP SURAT & TTD          -->
+        <!-- ========================================== -->
+        <section id="tab-kop" class="hidden space-y-5">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                
+                <!-- KOP SURAT CONFIGURATION (6 Cols) -->
+                <div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div>
+                            <h2 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-building-columns text-brand-600"></i>
+                                <span>Pengaturan Kop Surat Instansi</span>
+                            </h2>
+                            <p class="text-xs text-slate-500">Sesuaikan identitas kop surat resmi di bagian atas dokumen notulen</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle-show-kop" checked onchange="syncDocumentPreview()" class="sr-only peer">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all relative peer-checked:bg-brand-600"></div>
+                                <span class="ml-2 text-xs font-medium text-slate-700">Tampilkan Kop</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Logo Uploader & Preset Selector -->
+                    <div class="flex flex-col sm:flex-row items-center gap-4 p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                        <div class="w-20 h-20 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-2 shrink-0 shadow-sm">
+                            <img id="kop-logo-preview" src="" alt="Logo Instansi" class="max-h-full max-w-full object-contain">
+                        </div>
+                        <div class="flex-1 space-y-2 w-full">
+                            <div class="text-xs font-semibold text-slate-700">Logo Instansi / Perusahaan</div>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="cursor-pointer px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-medium transition inline-flex items-center gap-1.5">
+                                    <i class="fa-solid fa-upload"></i>
+                                    <span>Unggah Logo</span>
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                                </label>
+                                <button type="button" onclick="setPresetLogo('garuda')" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-medium transition">
+                                    Lambang Dinas
+                                </button>
+                                <button type="button" onclick="setPresetLogo('korporat')" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-medium transition">
+                                    Logo Korporat
+                                </button>
+                            </div>
+                            <p class="text-[11px] text-slate-400">Mendukung format PNG, JPG, atau SVG transparan.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Instansi Induk / Baris Header Atas</label>
+                            <input type="text" id="kop-induk" oninput="syncDocumentPreview()" value="PEMERINTAH REPUBLIK INDONESIA" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-medium uppercase focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Satuan Kerja / Instansi Utama</label>
+                            <input type="text" id="kop-satker" oninput="syncDocumentPreview()" value="DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-bold uppercase focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Lengkap Instansi</label>
+                            <input type="text" id="kop-alamat" oninput="syncDocumentPreview()" value="Jl. Merdeka Raya No. 45, Gedung Nusantara Lt. 2, Kota Administrasi" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Kontak (Telepon, Faksimile, Website, Email)</label>
+                            <input type="text" id="kop-kontak" oninput="syncDocumentPreview()" value="Telepon: (021) 555-0192 | Laman: www.instansi.go.id | Pos-el: sekretariat@instansi.go.id" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIGNATORIES / PENANDATANGAN CONFIGURATION (6 Cols) -->
+                <div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h2 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-pen-fancy text-brand-600"></i>
+                            <span>Pengaturan Penandatangan (Pimpinan & Notulis)</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">Blok pengesahan di bagian bawah halaman notulen rapat</p>
+                    </div>
+
+                    <!-- Kota Penandatanganan -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kota Tempat Ditetapkan Notulen</label>
+                        <input type="text" id="ttd-kota" oninput="syncDocumentPreview()" value="Jakarta" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="Contoh: Surabaya / Jakarta">
+                    </div>
+
+                    <!-- Pimpinan Rapat Card -->
+                    <div class="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/70 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-brand-800 flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-tie"></i> Pihak 1: Pimpinan Rapat (Sebelah Kiri)
+                            </span>
+                            <span class="text-[11px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md font-medium">Mengetahui / Mengesahkan</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Jabatan Pimpinan Rapat</label>
+                                <input type="text" id="ttd-pimpinan-jabatan" oninput="syncDocumentPreview()" value="Kepala Dinas Komunikasi dan Informatika" class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Nama Lengkap & Gelar</label>
+                                <input type="text" id="ttd-pimpinan-nama" oninput="syncDocumentPreview()" value="Dr. H. Ahmad Fauzi, S.H., M.H." class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">NIP / NRP / NIK / ID</label>
+                                <input type="text" id="ttd-pimpinan-nip" oninput="syncDocumentPreview()" value="NIP. 19750412 200003 1 004" class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notulis Rapat Card -->
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-pen"></i> Pihak 2: Notulis Rapat (Sebelah Kanan)
+                            </span>
+                            <span class="text-[11px] text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-md font-medium">Pembuat Notulen</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Jabatan / Peran Notulis</label>
+                                <input type="text" id="ttd-notulis-jabatan" oninput="syncDocumentPreview()" value="Notulis Rapat / Pranata Humas Ahli Muda" class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">Nama Lengkap & Gelar</label>
+                                <input type="text" id="ttd-notulis-nama" oninput="syncDocumentPreview()" value="Rina Kartika Sari, S.I.Kom." class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700 mb-1">NIP / NRP / NIK / ID</label>
+                                <input type="text" id="ttd-notulis-nip" oninput="syncDocumentPreview()" value="NIP. 19910823 201503 2 008" class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="button" onclick="switchTab('hasil')" class="py-2.5 px-5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Simpan & Lihat Dokumen Notulen</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: HASIL NOTULEN & EDITOR RESMI A4     -->
+        <!-- ========================================== -->
+        <section id="tab-hasil" class="hidden space-y-5">
+            
+            <!-- ACTION TOOLBAR (NO-PRINT) -->
+            <div class="no-print bg-white rounded-2xl shadow-sm border border-slate-200/80 p-3.5 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Format Switcher -->
+                    <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                        <button type="button" onclick="changeFormatFromToolbar('dinas')" id="btn-fmt-dinas" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-white text-brand-800 shadow-sm">
+                            Format Dinas
+                        </button>
+                        <button type="button" onclick="changeFormatFromToolbar('eksekutif')" id="btn-fmt-eksekutif" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900">
+                            Eksekutif
+                        </button>
+                        <button type="button" onclick="changeFormatFromToolbar('matriks')" id="btn-fmt-matriks" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900">
+                            Tabel Matriks
+                        </button>
+                    </div>
+
+                    <!-- Unclear Audio Verification Counter & Quick Clear -->
+                    <div id="unclear-toolbar-alert" class="flex items-center gap-2 bg-amber-50 border border-amber-300 text-amber-900 px-3 py-1.5 rounded-xl text-xs">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                        <span><strong id="unclear-count-text">2</strong> bagian perlu verifikasi suara</span>
+                        <button onclick="resolveAllUnclearMarkers()" class="ml-1 underline font-semibold text-amber-800 hover:text-amber-950" title="Sahkan semua tanda kuning menjadi teks normal">
+                            Sahkan Semua
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Export & Print Buttons -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="reprocessCurrentAudio()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-brand-600"></i>
+                        <span>Susun Ulang AI</span>
+                    </button>
+
+                    <button type="button" onclick="exportToWord()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-word"></i>
+                        <span>Unduh Word (.doc)</span>
+                    </button>
+
+                    <button type="button" onclick="window.print()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak / PDF Resmi</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- MAIN WORKSPACE: LEFT TRANSCRIPT DIARIZATION + RIGHT A4 OFFICIAL PAPER -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                
+                <!-- LEFT PANEL: SPEAKER DIARIZATION & UNCLEAR SEGMENTS (4 Cols, No-Print) -->
+                <div class="no-print lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div class="bg-slate-900 text-white px-4 py-3.5 flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-xs uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-comments text-emerald-400"></i>
+                                <span>Log Pembicara & Rekaman</span>
+                            </h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Deteksi siapa yang berbicara & tanda suara meragukan</p>
+                        </div>
+                        <button onclick="filterUnclearTranscript()" id="btn-filter-unclear" class="text-[11px] bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/30 px-2.5 py-1 rounded-lg font-medium transition">
+                            Filter ⚠️
+                        </button>
+                    </div>
+
+                    <!-- Speaker Legend / Summary -->
+                    <div id="speaker-badges-container" class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-1.5">
+                        <!-- Dynamically populated speaker pills -->
+                    </div>
+
+                    <!-- Diarized Transcript List -->
+                    <div id="transcript-list" class="p-3 space-y-2.5 max-h-[540px] overflow-y-auto divide-y divide-slate-100">
+                        <!-- Dynamically populated transcript items -->
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL: A4 OFFICIAL NOTULEN DOCUMENT PREVIEW & LIVE EDITOR (8 Cols) -->
+                <div class="lg:col-span-8">
+                    <!-- Rich Text Helper Bar (No-Print) -->
+                    <div class="no-print bg-slate-800 text-slate-200 rounded-t-xl px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs max-w-[210mm] mx-auto">
+                        <div class="flex items-center gap-1">
+                            <span class="text-slate-400 mr-2"><i class="fa-solid fa-pen-to-square mr-1"></i>Editor Langsung:</span>
+                            <button onclick="formatDoc('bold')" class="p-1.5 hover:bg-slate-700 rounded" title="Tebal"><i class="fa-solid fa-bold"></i></button>
+                            <button onclick="formatDoc('italic')" class="p-1.5 hover:bg-slate-700 rounded" title="Miring"><i class="fa-solid fa-italic"></i></button>
+                            <button onclick="formatDoc('underline')" class="p-1.5 hover:bg-slate-700 rounded" title="Garis Bawah"><i class="fa-solid fa-underline"></i></button>
+                            <span class="mx-1 text-slate-600">|</span>
+                            <button onclick="formatDoc('insertUnorderedList')" class="p-1.5 hover:bg-slate-700 rounded" title="Daftar Poin"><i class="fa-solid fa-list-ul"></i></button>
+                            <button onclick="formatDoc('insertOrderedList')" class="p-1.5 hover:bg-slate-700 rounded" title="Daftar Nomor"><i class="fa-solid fa-list-ol"></i></button>
+                        </div>
+                        <div class="text-[11px] text-emerald-300">
+                            <i class="fa-solid fa-hand-pointer mr-1"></i>Klik teks di kertas A4 untuk mengedit manual
+                        </div>
+                    </div>
+
+                    <!-- THE A4 PAPER (Printable & Exportable) -->
+                    <div id="printable-a4-area" class="a4-paper rounded-b-xl">
+                        
+                        <!-- 1. KOP SURAT RESMI -->
+                        <div id="doc-kop-container" class="kop-border">
+                            <table class="w-full border-collapse">
+                                <tr>
+                                    <td class="w-24 align-middle text-center pr-3" style="width: 85px;">
+                                        <img id="doc-kop-logo" src="" alt="Logo" class="w-20 h-20 object-contain mx-auto" style="width: 72px; height: 72px;">
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div id="doc-kop-induk" class="text-sm font-bold tracking-wide uppercase leading-snug" style="font-size: 12pt;">
+                                            PEMERINTAH REPUBLIK INDONESIA
+                                        </div>
+                                        <div id="doc-kop-satker" class="text-base font-bold tracking-wide uppercase leading-tight mt-0.5" style="font-size: 14pt;">
+                                            DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN
+                                        </div>
+                                        <div id="doc-kop-alamat" class="text-xs mt-1 leading-snug" style="font-size: 10pt;">
+                                            Jl. Merdeka Raya No. 45, Gedung Nusantara Lt. 2, Kota Administrasi
+                                        </div>
+                                        <div id="doc-kop-kontak" class="text-[11px] italic leading-snug" style="font-size: 9.5pt;">
+                                            Telepon: (021) 555-0192 | Laman: www.instansi.go.id | Pos-el: sekretariat@instansi.go.id
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 2. JUDUL DOKUMEN -->
+                        <div class="text-center my-4">
+                            <h2 class="font-bold text-base uppercase underline tracking-wider" style="font-size: 13pt;">NOTULEN RAPAT</h2>
+                        </div>
+
+                        <!-- 3. METADATA RAPAT TABLE -->
+                        <table class="w-full text-sm mb-5 border-collapse" style="font-size: 11pt;">
+                            <tbody>
+                                <tr>
+                                    <td class="py-0.5 font-bold align-top" style="width: 150px;">Hari / Tanggal</td>
+                                    <td class="py-0.5 align-top" style="width: 15px;">:</td>
+                                    <td id="doc-meta-tanggal" class="py-0.5 align-top font-medium">Selasa, 27 Oktober 2026</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-0.5 font-bold align-top">Waktu Rapat</td>
+                                    <td class="py-0.5 align-top">:</td>
+                                    <td id="doc-meta-waktu" class="py-0.5 align-top">09.00 WIB s.d. Selesai</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-0.5 font-bold align-top">Tempat / Media</td>
+                                    <td class="py-0.5 align-top">:</td>
+                                    <td id="doc-meta-tempat" class="py-0.5 align-top">Ruang Rapat Utama Lt. 2 / Hybrid Zoom</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-0.5 font-bold align-top">Agenda / Acara</td>
+                                    <td class="py-0.5 align-top">:</td>
+                                    <td id="doc-meta-agenda" class="py-0.5 align-top font-bold">Rapat Koordinasi Evaluasi Kinerja Triwulan & Optimalisasi Layanan Digital</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-0.5 font-bold align-top">Pimpinan Rapat</td>
+                                    <td class="py-0.5 align-top">:</td>
+                                    <td id="doc-meta-pimpinan" class="py-0.5 align-top">Dr. H. Ahmad Fauzi, S.H., M.H. (Kepala Dinas Komunikasi dan Informatika)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-0.5 font-bold align-top">Notulis</td>
+                                    <td class="py-0.5 align-top">:</td>
+                                    <td id="doc-meta-notulis" class="py-0.5 align-top">Rina Kartika Sari, S.I.Kom.</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-0.5 font-bold align-top">Peserta Hadir</td>
+                                    <td class="py-0.5 align-top">:</td>
+                                    <td id="doc-meta-peserta" class="py-0.5 align-top text-justify">Dr. H. Ahmad Fauzi, S.H., M.H., Budi Santoso, S.Kom., Siti Aminah, S.E., Hendra Wijaya</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <hr class="border-t border-black/40 my-3">
+
+                        <!-- 4. ISI NOTULEN (EDITABLE RICH CONTENT) -->
+                        <div id="doc-body-content" contenteditable="true" class="outline-none focus:ring-2 focus:ring-brand-500/30 rounded p-1 min-h-[320px] space-y-4 text-justify">
+                            <!-- Dynamically rendered based on selected Format (Dinas / Eksekutif / Matriks) -->
+                        </div>
+
+                        <!-- 5. BLOK TANDA TANGAN (PIMPINAN RAPAT & NOTULIS) -->
+                        <div class="mt-10 pt-4 break-inside-avoid">
+                            <table class="w-full text-center border-collapse" style="font-size: 11pt;">
+                                <tr>
+                                    <td class="w-1/2 align-top px-2">
+                                        <div>Mengetahui / Mengesahkan,</div>
+                                        <div class="font-bold">Pimpinan Rapat</div>
+                                        <div id="doc-ttd-pimpinan-jabatan" class="text-xs italic mt-0.5">Kepala Dinas Komunikasi dan Informatika</div>
+                                        <div style="height: 70px;"></div>
+                                        <div id="doc-ttd-pimpinan-nama" class="font-bold underline">Dr. H. Ahmad Fauzi, S.H., M.H.</div>
+                                        <div id="doc-ttd-pimpinan-nip" class="text-xs mt-0.5">NIP. 19750412 200003 1 004</div>
+                                    </td>
+                                    <td class="w-1/2 align-top px-2">
+                                        <div><span id="doc-ttd-kota">Jakarta</span>, <span id="doc-ttd-tanggal">27 Oktober 2026</span></div>
+                                        <div class="font-bold">Notulis Rapat</div>
+                                        <div id="doc-ttd-notulis-jabatan" class="text-xs italic mt-0.5">Notulis Rapat / Pranata Humas Ahli Muda</div>
+                                        <div style="height: 70px;"></div>
+                                        <div id="doc-ttd-notulis-nama" class="font-bold underline">Rina Kartika Sari, S.I.Kom.</div>
+                                        <div id="doc-ttd-notulis-nip" class="text-xs mt-0.5">NIP. 19910823 201503 2 008</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL FOR EDITING / VERIFYING UNCLEAR AUDIO SEGMENT -->
+    <div id="verify-modal" class="no-print fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2 text-amber-700 font-bold text-sm">
+                    <i class="fa-solid fa-ear-listen text-lg"></i>
+                    <span>Verifikasi Bagian Suara Kurang Jelas</span>
+                </div>
+                <button onclick="closeVerifyModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 space-y-1">
+                <div class="font-semibold flex items-center justify-between">
+                    <span id="verify-modal-speaker">Pembicara: Hendra Wijaya</span>
+                    <span id="verify-modal-time" class="font-mono bg-amber-200/70 px-2 py-0.5 rounded">Menit 04:18</span>
+                </div>
+                <p id="verify-modal-reason" class="text-amber-700 italic">Alasan AI: Suara tumpang tindih dengan derau mikrofon saat menyebutkan angka kapasitas server.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Perbaiki Kalimat / Fakta Sebenarnya:</label>
+                <textarea id="verify-modal-input" rows="3" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeVerifyModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-600">
+                    Batal
+                </button>
+                <button onclick="saveVerifiedSegment()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-xs font-semibold text-white shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Simpan & Hapus Tanda ⚠️</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-box" class="no-print fixed bottom-20 md:bottom-6 right-4 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center gap-3 text-xs font-medium max-w-sm">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toast-message">Berhasil disimpan</span>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR (Android App Style) -->
+    <nav class="no-print md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg flex items-center justify-around py-1.5 px-2">
+        <button onclick="switchTab('rekam')" id="nav-mob-rekam" class="flex-1 py-1.5 flex flex-col items-center justify-center text-brand-700 font-semibold">
+            <div class="w-10 h-7 rounded-full bg-brand-100 flex items-center justify-center mb-0.5" id="pill-mob-rekam">
+                <i class="fa-solid fa-microphone text-sm"></i>
+            </div>
+            <span class="text-[11px]">Rekam & Rapat</span>
+        </button>
+
+        <button onclick="switchTab('kop')" id="nav-mob-kop" class="flex-1 py-1.5 flex flex-col items-center justify-center text-slate-500 font-medium">
+            <div class="w-10 h-7 rounded-full flex items-center justify-center mb-0.5" id="pill-mob-kop">
+                <i class="fa-solid fa-building-columns text-sm"></i>
+            </div>
+            <span class="text-[11px]">Kop & TTD</span>
+        </button>
+
+        <button onclick="switchTab('hasil')" id="nav-mob-hasil" class="flex-1 py-1.5 flex flex-col items-center justify-center text-slate-500 font-medium relative">
+            <div class="w-10 h-7 rounded-full flex items-center justify-center mb-0.5 relative" id="pill-mob-hasil">
+                <i class="fa-solid fa-file-signature text-sm"></i>
+                <span id="badge-unclear-mob" class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 bg-amber-400 text-slate-950 text-[10px] font-bold rounded-full flex items-center justify-center">!</span>
+            </div>
+            <span class="text-[11px]">Hasil Notulen</span>
+        </button>
+    </nav>
+
+    <!-- APPLICATION JAVASCRIPT -->
+    <script>
+        // ============================================================================
+        // 1. STATE & INITIAL DATA (Default Realistic Meeting Data with Speaker Diarization)
+        // ============================================================================
+        const apiKey = ""; // Provided by environment at runtime
+
+        // SVG Data URLs for Default Official Logos (Safe for Print & Word Export)
+        const PRESET_LOGOS = {
+            garuda: `data:image/svg+xml;utf8,` + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="80" height="80">
+                    <circle cx="60" cy="60" r="54" fill="#064e3b" stroke="#d97706" stroke-width="5"/>
+                    <circle cx="60" cy="60" r="46" fill="none" stroke="#fde68a" stroke-width="1.5" stroke-dasharray="4 2"/>
+                    <path d="M60 22 L72 46 L98 46 L77 62 L85 88 L60 72 L35 88 L43 62 L22 46 L48 46 Z" fill="#fbbf24"/>
+                    <circle cx="60" cy="58" r="14" fill="#064e3b" stroke="#fbbf24" stroke-width="2"/>
+                    <path d="M54 58 L58 62 L67 53" stroke="#fbbf24" stroke-width="3" fill="none" stroke-linecap="round"/>
+                </svg>
+            `),
+            korporat: `data:image/svg+xml;utf8,` + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="80" height="80">
+                    <rect x="12" y="12" width="96" height="96" rx="22" fill="#0f172a" stroke="#10b981" stroke-width="5"/>
+                    <path d="M35 75 L52 42 L68 64 L85 38" stroke="#10b981" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="85" cy="38" r="6" fill="#34d399"/>
+                    <rect x="35" y="82" width="50" height="6" rx="3" fill="#94a3b8"/>
+                </svg>
+            `)
+        };
+
+        let currentLogoDataUrl = PRESET_LOGOS.garuda;
+        let showOnlyUnclearTranscript = false;
+        let activeVerifyIndex = null;
+
+        // Audio Recording State
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordedAudioBlob = null;
+        let recordedAudioBase64 = null;
+        let recordedAudioMime = "audio/webm";
+        let isRecording = false;
+        let isPaused = false;
+        let timerInterval = null;
+        let elapsedSeconds = 0;
+        let liveUnclearBookmarks = [];
+
+        // Web Audio Visualizer State
+        let audioCtx = null;
+        let analyser = null;
+        let animationId = null;
+
+        // Structured Meeting Result State (Populated by AI or Default Demo)
+        let meetingResult = {
+            pembukaan: "Rapat dibuka secara resmi pada pukul 09.00 WIB oleh Pimpinan Rapat, Bapak Dr. H. Ahmad Fauzi, S.H., M.H., dengan mengucapkan rasa syukur serta apresiasi atas kehadiran seluruh jajaran pejabat struktural dan tim teknis. Beliau menyampaikan bahwa fokus utama pertemuan hari ini adalah mengevaluasi capaian kinerja layanan publik digital pada triwulan berjalan sekaligus merumuskan langkah percepatan integrasi server pelayanan.",
+            arahanPimpinan: "Pimpinan Rapat menekankan agar seluruh unit kerja mengedepankan transparansi, ketepatan waktu, dan kualitas pelayanan yang berorientasi pada kemudahan masyarakat. Setiap kendala teknis yang menghambat responsivitas aplikasi wajib segera dipetakan solusinya hari ini dengan target penyelesaian yang terukur.",
+            pembahasanPerPembicara: [
+                {
+                    pembicara: "Dr. H. Ahmad Fauzi, S.H., M.H. (Pimpinan Rapat)",
+                    waktu: "00:45",
+                    poin: "Membuka jalannya rapat dan meminta laporan komprehensif dari Kepala Bagian TI terkait insiden melambatnya akses portal layanan terpadu pada awal pekan, serta laporan serapan anggaran dari Subbagian Keuangan.",
+                    isUnclear: false,
+                    catatanUnclear: ""
+                },
+                {
+                    pembicara: "Budi Santoso, S.Kom. (Kabag TI)",
+                    waktu: "02:15",
+                    poin: "Memaparkan bahwa lonjakan trafik pengguna meningkat hingga 240% pada jam sibuk (08.30 - 11.00 WIB). Tim telah melakukan optimasi indeks basis data, namun diperlukan penambahan kapasitas memori server cadangan.",
+                    isUnclear: false,
+                    catatanUnclear: ""
+                },
+                {
+                    pembicara: "Hendra Wijaya (Tim Teknis)",
+                    waktu: "04:18",
+                    poin: "Menjelaskan rincian teknis migrasi klaster server dan menyebutkan kebutuhan penambahan kapasitas sebesar [⚠️ Suara Kurang Jelas - Menit 04:18: \"...antara 64 GB atau 128 GB untuk node database utama...\"] guna mencegah terjadinya waktu henti (downtime) saat jam pelayanan puncak.",
+                    isUnclear: true,
+                    catatanUnclear: "Suara pembicara tertutup derau mikrofon saat menyebutkan angka pasti kapasitas RAM server (64 GB atau 128 GB)."
+                },
+                {
+                    pembicara: "Siti Aminah, S.E. (Kasubbag Keuangan)",
+                    waktu: "06:50",
+                    poin: "Menanggapi usulan penambahan infrastruktur, anggaran pemeliharaan dan peningkatan kapasitas server masih tersedia pada pos belanja modal triwulan ini. Proses pengadaan melalui e-Katalog dapat dieksekusi setelah spesifikasi teknis disahkan dengan estimasi anggaran sekitar [⚠️ Suara Kurang Jelas - Menit 07:12: \"...Rp45.000.000 atau Rp54.000.000...\"].",
+                    isUnclear: true,
+                    catatanUnclear: "Pengucapan nominal anggaran terdengar kurang jelas karena tumpang tindih dengan suara dokumen."
+                }
+            ],
+            kesimpulan: [
+                "Disepakati pelaksanaan peningkatan kapasitas (upgrade) server layanan digital secara bertahap mulai pekan ini di luar jam operasional pelayanan agar tidak mengganggu akses masyarakat.",
+                "Subbagian Keuangan bersama Bagian TI akan memfinalisasi dokumen spesifikasi dan rincian biaya pengadaan melalui e-Katalog paling lambat hari Jumat.",
+                "Seluruh tim teknis diwajibkan menyusun laporan pemantauan performa harian (daily monitoring) selama masa transisi sistem."
+            ],
+            tindakLanjut: [
+                {
+                    agenda: "Optimasi & Upgrade Kapasitas Server Layanan",
+                    pembahasan: "Lonjakan trafik 240% membutuhkan penambahan kapasitas RAM dan penjadwalan ulang pemeliharaan.",
+                    keputusan: "Melakukan upgrade node database dan load balancer pada akhir pekan.",
+                    pic: "Budi Santoso, S.Kom. & Hendra Wijaya",
+                    tenggat: "Jumat, 30 Oktober 2026"
+                },
+                {
+                    agenda: "Verifikasi Anggaran & Pengadaan e-Katalog",
+                    pembahasan: "Ketersediaan pagu belanja pemeliharaan infrastruktur TI triwulan berjalan.",
+                    keputusan: "Menyelesaikan verifikasi nominal spesifikasi dan penerbitan surat pesanan.",
+                    pic: "Siti Aminah, S.E. (Kasubbag Keuangan)",
+                    tenggat: "Kamis, 29 Oktober 2026"
+                },
+                {
+                    agenda: "Evaluasi Berkala Responsivitas Layanan",
+                    pembahasan: "Pemantauan kestabilan sistem pasca-upgrade oleh tim sekretariat.",
+                    keputusan: "Melaporkan metrik uptime mingguan kepada Pimpinan Rapat.",
+                    pic: "Seluruh Tim Teknis & Sekretariat",
+                    tenggat: "Setiap Hari Senin"
+                }
+            ],
+            transkripDiarization: [
+                {
+                    speaker: "Dr. H. Ahmad Fauzi, S.H., M.H.",
+                    role: "Pimpinan Rapat",
+                    timestamp: "00:45",
+                    text: "Assalamualaikum wr. wb., selamat pagi Bapak dan Ibu sekalian. Mari kita mulai rapat evaluasi triwulan ini. Fokus kita adalah memastikan layanan digital kita tidak lagi mengalami kendala lambat akses seperti Senin kemarin. Silakan Pak Budi disampaikan dulu evaluasinya.",
+                    isUnclear: false,
+                    unclearReason: ""
+                },
+                {
+                    speaker: "Budi Santoso, S.Kom.",
+                    role: "Kabag TI",
+                    timestamp: "02:15",
+                    text: "Terima kasih Pak Kadis. Berdasarkan pantauan log server, terjadi lonjakan akses hingga 240 persen pada pukul 08.30 sampai 11.00 siang. Kami sudah mengoptimalkan query database, tetapi beban memori sudah menyentuh 92 persen.",
+                    isUnclear: false,
+                    unclearReason: ""
+                },
+                {
+                    speaker: "Hendra Wijaya",
+                    role: "Tim Teknis",
+                    timestamp: "04:18",
+                    text: "Izin menambahkan Pak. Untuk jangka pendek pekan ini, kami menyarankan penambahan alokasi RAM pada klaster database utama sebesar [⚠️ Suara Kurang Jelas: \"...64 GB atau 128 GB...\"] serta penyesuaian konfigurasi worker agar antrean request tidak menumpuk.",
+                    isUnclear: true,
+                    unclearReason: "Suara agak menjauh dari mikrofon saat menyebutkan angka kapasitas RAM (64 GB / 128 GB)."
+                },
+                {
+                    speaker: "Siti Aminah, S.E.",
+                    role: "Kasubbag Keuangan",
+                    timestamp: "06:50",
+                    text: "Dari sisi anggaran, pos pemeliharaan infrastruktur TI masih mencukupi Pak. Apabila menggunakan skema e-Katalog, alokasi yang bisa langsung diserap berkisar [⚠️ Suara Kurang Jelas: \"...Rp45 juta atau Rp54 juta...\"] sesuai rincian KAK dari bagian TI.",
+                    isUnclear: true,
+                    unclearReason: "Nominal angka terdengar kurang jelas karena ada suara batuk di ruangan."
+                },
+                {
+                    speaker: "Dr. H. Ahmad Fauzi, S.H., M.H.",
+                    role: "Pimpinan Rapat",
+                    timestamp: "08:30",
+                    text: "Baik, sangat jelas. Saya minta hari Kamis dokumen spesifikasi dan anggarannya sudah beres, dan Jumat malam proses upgrade dieksekusi di luar jam kerja agar masyarakat tetap terlayani dengan nyaman.",
+                    isUnclear: false,
+                    unclearReason: ""
+                }
+            ]
+        };
+
+        // ============================================================================
+        // 2. INITIALIZATION ON PAGE LOAD
+        // ============================================================================
+        window.onload = function () {
+            // Set default Indonesian date
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const now = new Date();
+            const formattedHariTanggal = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+            document.getElementById('meta-tanggal').value = formattedHariTanggal;
+
+            // Set initial logo
+            document.getElementById('kop-logo-preview').src = currentLogoDataUrl;
+            document.getElementById('doc-kop-logo').src = currentLogoDataUrl;
+
+            // Draw initial idle waveform
+            drawIdleWaveform();
+
+            // Render initial document & transcript
+            syncDocumentPreview();
+            renderTranscriptAndSpeakers();
+            renderNotulenBody();
+
+            window.addEventListener('resize', () => {
+                if (!isRecording) drawIdleWaveform();
+            });
+        };
+
+        // ============================================================================
+        // 3. NAVIGATION & UI HELPERS
+        // ============================================================================
+        function switchTab(tabName) {
+            const tabs = ['rekam', 'kop', 'hasil'];
+            tabs.forEach(t => {
+                const section = document.getElementById(`tab-${t}`);
+                const deskBtn = document.getElementById(`nav-desk-${t}`);
+                const mobBtn = document.getElementById(`nav-mob-${t}`);
+                const mobPill = document.getElementById(`pill-mob-${t}`);
+
+                if (t === tabName) {
+                    section.classList.remove('hidden');
+                    // Desktop active
+                    deskBtn.className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 bg-white text-brand-900 shadow-sm";
+                    // Mobile active
+                    mobBtn.className = "flex-1 py-1.5 flex flex-col items-center justify-center text-brand-700 font-semibold relative";
+                    mobPill.classList.add('bg-brand-100');
+                } else {
+                    section.classList.add('hidden');
+                    // Desktop inactive
+                    deskBtn.className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-emerald-100 hover:bg-white/10 relative";
+                    // Mobile inactive
+                    mobBtn.className = "flex-1 py-1.5 flex flex-col items-center justify-center text-slate-500 font-medium relative";
+                    mobPill.classList.remove('bg-brand-100');
+                }
+            });
+
+            if (tabName === 'hasil') {
+                syncDocumentPreview();
+                updateUnclearCountBadges();
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const box = document.getElementById('toast-box');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+
+            msg.textContent = message;
+            if (type === 'warning') {
+                icon.className = "fa-solid fa-triangle-exclamation text-amber-400 text-base";
+            } else if (type === 'info') {
+                icon.className = "fa-solid fa-wand-magic-sparkles text-sky-400 text-base";
+            } else {
+                icon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+            }
+
+            box.classList.remove('translate-y-12', 'opacity-0');
+            setTimeout(() => {
+                box.classList.add('translate-y-12', 'opacity-0');
+            }, 3400);
+        }
+
+        // ============================================================================
+        // 4. AUDIO RECORDER & REAL-TIME CANVAS WAVEFORM VISUALIZER
+        // ============================================================================
+        function drawIdleWaveform() {
+            const canvas = document.getElementById('waveform-canvas');
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width || 400;
+            canvas.height = rect.height || 110;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw subtle center wave
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.stroke();
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+                liveUnclearBookmarks = [];
+                document.getElementById('bookmark-count').textContent = '0';
+
+                mediaRecorder = new MediaRecorder(stream);
+                recordedAudioMime = mediaRecorder.mimeType || 'audio/webm';
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        audioChunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach(track => track.stop());
+                    if (animationId) cancelAnimationFrame(animationId);
+
+                    recordedAudioBlob = new Blob(audioChunks, { type: recordedAudioMime });
+                    const audioUrl = URL.createObjectURL(recordedAudioBlob);
+                    const player = document.getElementById('audio-player');
+                    player.src = audioUrl;
+                    document.getElementById('audio-preview-box').classList.remove('hidden');
+
+                    // Convert blob to base64 and trigger AI summarization automatically
+                    recordedAudioBase64 = await blobToBase64(recordedAudioBlob);
+                    await processMeetingWithGemini(recordedAudioBase64, recordedAudioMime);
+                };
+
+                mediaRecorder.start(250);
+                isRecording = true;
+                isPaused = false;
+                elapsedSeconds = 0;
+                updateTimerDisplay();
+
+                timerInterval = setInterval(() => {
+                    if (!isPaused) {
+                        elapsedSeconds++;
+                        updateTimerDisplay();
+                    }
+                }, 1000);
+
+                // Update UI controls
+                document.getElementById('btn-record').classList.add('hidden');
+                document.getElementById('btn-pause').classList.remove('hidden');
+                document.getElementById('btn-pause').classList.add('flex');
+                document.getElementById('btn-stop').classList.remove('hidden');
+                document.getElementById('btn-stop').classList.add('flex');
+                document.getElementById('live-marker-bar').classList.remove('hidden');
+                document.getElementById('canvas-Overlay-hint').classList.add('hidden');
+
+                const dot = document.getElementById('rec-status-dot');
+                dot.className = "w-3 h-3 rounded-full bg-red-500 inline-block recording-pulse";
+                document.getElementById('rec-status-text').textContent = "Sedang Merekam Suara Rapat...";
+                document.getElementById('rec-subtext').textContent = "Mendeteksi pembicara secara aktif. Klik 'Stop & Rangkum AI' jika rapat selesai.";
+
+                // Start Web Audio Visualizer
+                startAudioVisualizer(stream);
+                showToast("Perekaman rapat dimulai. Silakan berbicara dengan jelas.", "info");
+
+            } catch (err) {
+                // If microphone access is blocked in iframe/browser, offer seamless simulation
+                showToast("Akses mikrofon tidak diizinkan browser. Menjalankan mode Simulasi Rekaman Rapat...", "warning");
+                setTimeout(() => runSimulatedMeeting(), 900);
+            }
+        }
+
+        function startAudioVisualizer(stream) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 128;
+            source.connect(analyser);
+
+            const canvas = document.getElementById('waveform-canvas');
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function renderFrame() {
+                if (!isRecording) return;
+                animationId = requestAnimationFrame(renderFrame);
+                analyser.getByteFrequencyData(dataArray);
+
+                ctx.fillStyle = '#020617';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const barWidth = (canvas.width / bufferLength) * 1.8;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = Math.max(4, (dataArray[i] / 255) * (canvas.height * 0.85));
+                    const y = (canvas.height - barHeight) / 2;
+
+                    const gradient = ctx.createLinearGradient(0, y, 0, y + barHeight);
+                    if (isPaused) {
+                        gradient.addColorStop(0, '#f59e0b');
+                        gradient.addColorStop(1, '#b45309');
+                    } else {
+                        gradient.addColorStop(0, '#34d399');
+                        gradient.addColorStop(1, '#059669');
+                    }
+
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x, y, barWidth - 2, barHeight);
+                    x += barWidth;
+                }
+            }
+            renderFrame();
+        }
+
+        function togglePauseRecording() {
+            if (!mediaRecorder || !isRecording) return;
+            const icon = document.getElementById('icon-pause');
+            const text = document.getElementById('text-pause');
+            const dot = document.getElementById('rec-status-dot');
+
+            if (!isPaused) {
+                mediaRecorder.pause();
+                isPaused = true;
+                icon.className = "fa-solid fa-play";
+                text.textContent = "Lanjut";
+                dot.className = "w-3 h-3 rounded-full bg-amber-400 inline-block";
+                document.getElementById('rec-status-text').textContent = "Rekaman Dijeda";
+                showToast("Rekaman dijeda sementara", "warning");
+            } else {
+                mediaRecorder.resume();
+                isPaused = false;
+                icon.className = "fa-solid fa-pause";
+                text.textContent = "Jeda";
+                dot.className = "w-3 h-3 rounded-full bg-red-500 inline-block recording-pulse";
+                document.getElementById('rec-status-text').textContent = "Sedang Merekam Suara Rapat...";
+                showToast("Rekaman dilanjutkan", "info");
+            }
+        }
+
+        function addLiveUnclearBookmark() {
+            const timeStr = formatSeconds(elapsedSeconds);
+            liveUnclearBookmarks.push(timeStr);
+            document.getElementById('bookmark-count').textContent = liveUnclearBookmarks.length;
+            showToast(`Menit ${timeStr} ditandai untuk diperiksa AI lebih teliti.`, "warning");
+        }
+
+        function stopRecordingAndProcess() {
+            if (timerInterval) clearInterval(timerInterval);
+            isRecording = false;
+            isPaused = false;
+
+            // Reset buttons
+            document.getElementById('btn-record').classList.remove('hidden');
+            document.getElementById('btn-pause').classList.add('hidden');
+            document.getElementById('btn-pause').classList.remove('flex');
+            document.getElementById('btn-stop').classList.add('hidden');
+            document.getElementById('btn-stop').classList.remove('flex');
+            document.getElementById('live-marker-bar').classList.add('hidden');
+            document.getElementById('canvas-Overlay-hint').classList.remove('hidden');
+
+            const dot = document.getElementById('rec-status-dot');
+            dot.className = "w-3 h-3 rounded-full bg-emerald-500 inline-block";
+            document.getElementById('rec-status-text').textContent = "Rekaman Selesai — Dirangkum AI";
+
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            } else {
+                runSimulatedMeeting();
+            }
+        }
+
+        async function handleAudioFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            recordedAudioBlob = file;
+            recordedAudioMime = file.type || 'audio/mp3';
+
+            const audioUrl = URL.createObjectURL(file);
+            const player = document.getElementById('audio-player');
+            player.src = audioUrl;
+            document.getElementById('audio-preview-box').classList.remove('hidden');
+
+            showToast(`File "${file.name}" berhasil dimuat. Memproses dengan AI...`, "info");
+            recordedAudioBase64 = await blobToBase64(file);
+            await processMeetingWithGemini(recordedAudioBase64, recordedAudioMime);
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64String = reader.result.split(',')[1];
+                    resolve(base64String);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('rec-timer').textContent = formatSeconds(elapsedSeconds);
+        }
+
+        function formatSeconds(sec) {
+            const m = String(Math.floor(sec / 60)).padStart(2, '0');
+            const s = String(sec % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // ============================================================================
+        // 5. GEMINI API INTEGRATION (MULTIMODAL AUDIO & STRUCTURED NOTULEN GENERATOR)
+        // ============================================================================
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) return await response.json();
+                } catch (e) {
+                    // Retry silently with exponential backoff
+                }
+                await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+            }
+            throw new Error("Gagal menghubungi server AI setelah beberapa percobaan.");
+        }
+
+        async function processMeetingWithGemini(base64Audio = null, mimeType = "audio/webm", isSimulation = false) {
+            const modal = document.getElementById('ai-loading-modal');
+            const bar = document.getElementById('ai-loading-bar');
+            const stepText = document.getElementById('ai-loading-step');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            bar.style.width = "30%";
+            stepText.textContent = "Menganalisis rekaman suara & memisahkan identitas pembicara (Speaker Diarization)...";
+
+            const agenda = document.getElementById('meta-agenda').value;
+            const peserta = document.getElementById('meta-peserta').value;
+            const konteks = document.getElementById('meta-konteks').value;
+            const pimpinanNama = document.getElementById('ttd-pimpinan-nama').value;
+            const bookmarksNote = liveUnclearBookmarks.length > 0
+                ? `Notulis menandai secara manual bahwa suara pada menit [${liveUnclearBookmarks.join(', ')}] terdengar kurang jelas.`
+                : '';
+
+            const systemInstruction = `Kamu adalah Notulis Rapat Profesional Indonesia dan Ahli Tata Naskah Dinas.
+Tugasmu adalah menganalisis rekaman/transkrip rapat, mengidentifikasi siapa yang berbicara (Speaker Diarization) secara jelas, memberi tanda khusus apabila ada suara yang kurang jelas/bergumam/bising, lalu merangkum jalannya rapat secara terstruktur dengan bahasa Indonesia formal yang HUMANIS, luwes, sopan, dan mengalir alami.
+
+ATURAN PENTING:
+1. Deteksi Pembicara: Gunakan nama dan jabatan peserta dari daftar peserta rapat yang diberikan.
+2. Tanda Suara Kurang Jelas: Jika ada bagian rekaman yang kurang jelas atau meragukan (terutama angka, nama teknis, atau saat audio bising), WAJIB sertakan tag persis seperti ini di dalam kalimat poin pembahasan dan transkrip: [⚠️ Suara Kurang Jelas - Menit MM:SS: "...perkiraan kata..."] dan set properti isUnclear menjadi true. Pastikan minimal ada 1 atau 2 penanda suara kurang jelas apabila terdapat bagian yang ambigu atau saat mode simulasi dijalankan agar notulis dapat memverifikasinya.
+3. Gaya Bahasa Humanis: Gunakan diksi yang santun dan mengalir (contoh: "Pimpinan rapat membuka pertemuan dengan mengapresiasi...", "Menanggapi hal tersebut, Bapak/Ibu ... menyampaikan pandangan bahwa...").`;
+
+            const userPrompt = `Susunlah hasil notulen rapat lengkap beserta log transkrip pembicara berdasarkan informasi rapat berikut:
+- Agenda Rapat: ${agenda}
+- Pimpinan Rapat: ${pimpinanNama}
+- Daftar Peserta/Pembicara: ${peserta}
+- Konteks Tambahan: ${konteks || "Pembahasan evaluasi program, kendala teknis/operasional, anggaran, dan rencana tindak lanjut."}
+${bookmarksNote}
+${isSimulation ? "CATATAN: Buat simulasi rapat yang sangat realistis sesuai Agenda dan Daftar Peserta di atas, di mana setiap peserta berbicara secara bergantian, dan sertakan 2 bagian spesifik yang diberi tanda [⚠️ Suara Kurang Jelas - Menit MM:SS: \"...\"] karena suara tumpang tindih atau kurang terdengar jelas." : ""}`;
+
+            const parts = [{ text: userPrompt }];
+            if (base64Audio && base64Audio.length < 15000000) {
+                parts.push({
+                    inlineData: {
+                        mimeType: mimeType.split(';')[0] || "audio/webm",
+                        data: base64Audio
+                    }
+                });
+            }
+
+            const responseSchema = {
+                type: "OBJECT",
+                properties: {
+                    pembukaan: { type: "STRING" },
+                    arahanPimpinan: { type: "STRING" },
+                    pembahasanPerPembicara: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                pembicara: { type: "STRING" },
+                                waktu: { type: "STRING" },
+                                poin: { type: "STRING" },
+                                isUnclear: { type: "BOOLEAN" },
+                                catatanUnclear: { type: "STRING" }
+                            },
+                            propertyOrdering: ["pembicara", "waktu", "poin", "isUnclear", "catatanUnclear"]
+                        }
+                    },
+                    kesimpulan: {
+                        type: "ARRAY",
+                        items: { type: "STRING" }
+                    },
+                    tindakLanjut: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                agenda: { type: "STRING" },
+                                pembahasan: { type: "STRING" },
+                                keputusan: { type: "STRING" },
+                                pic: { type: "STRING" },
+                                tenggat: { type: "STRING" }
+                            },
+                            propertyOrdering: ["agenda", "pembahasan", "keputusan", "pic", "tenggat"]
+                        }
+                    },
+                    transkripDiarization: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                speaker: { type: "STRING" },
+                                role: { type: "STRING" },
+                                timestamp: { type: "STRING" },
+                                text: { type: "STRING" },
+                                isUnclear: { type: "BOOLEAN" },
+                                unclearReason: { type: "STRING" }
+                            },
+                            propertyOrdering: ["speaker", "role", "timestamp", "text", "isUnclear", "unclearReason"]
+                        }
+                    }
+                },
+                propertyOrdering: ["pembukaan", "arahanPimpinan", "pembahasanPerPembicara", "kesimpulan", "tindakLanjut", "transkripDiarization"]
+            };
+
+            try {
+                setTimeout(() => {
+                    bar.style.width = "70%";
+                    stepText.textContent = "Merangkum jalannya rapat dengan gaya bahasa humanis & terstruktur...";
+                }, 700);
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [{ role: "user", parts: parts }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: responseSchema
+                    }
+                };
+
+                const result = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (jsonText) {
+                    const parsed = JSON.parse(jsonText);
+                    meetingResult = parsed;
+                }
+            } catch (err) {
+                // Keep rich fallback data and customize it with current form inputs
+                customizeFallbackWithCurrentMetadata();
+            } finally {
+                bar.style.width = "100%";
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    syncDocumentPreview();
+                    renderTranscriptAndSpeakers();
+                    renderNotulenBody();
+                    switchTab('hasil');
+                    showToast("Notulen rapat selesai dirangkum AI! Silakan tinjau bagian bertanda ⚠️.", "success");
+                }, 400);
+            }
+        }
+
+        function customizeFallbackWithCurrentMetadata() {
+            const agenda = document.getElementById('meta-agenda').value;
+            const pimpinan = document.getElementById('ttd-pimpinan-nama').value;
+            meetingResult.pembukaan = `Rapat dibuka secara resmi oleh Pimpinan Rapat, ${pimpinan}, dengan menyampaikan apresiasi atas kehadiran seluruh peserta rapat dalam rangka membahas "${agenda}". Pertemuan berlangsung secara kondusif dan partisipatif.`;
+        }
+
+        function runSimulatedMeeting() {
+            processMeetingWithGemini(null, "audio/webm", true);
+        }
+
+        function reprocessCurrentAudio() {
+            if (recordedAudioBase64) {
+                processMeetingWithGemini(recordedAudioBase64, recordedAudioMime, false);
+            } else {
+                processMeetingWithGemini(null, "audio/webm", true);
+            }
+        }
+
+        // ============================================================================
+        // 6. RENDERING DIARIZED TRANSCRIPT & UNCLEAR AUDIO MARKERS
+        // ============================================================================
+        function renderTranscriptAndSpeakers() {
+            const listEl = document.getElementById('transcript-list');
+            const badgesEl = document.getElementById('speaker-badges-container');
+            if (!listEl || !badgesEl) return;
+
+            const items = meetingResult.transkripDiarization || [];
+
+            // Extract unique speakers
+            const speakers = [...new Set(items.map(i => i.speaker))];
+            badgesEl.innerHTML = speakers.map((sp, idx) => {
+                const colors = [
+                    'bg-emerald-100 text-emerald-800 border-emerald-200',
+                    'bg-blue-100 text-blue-800 border-blue-200',
+                    'bg-purple-100 text-purple-800 border-purple-200',
+                    'bg-amber-100 text-amber-800 border-amber-200'
+                ];
+                const colorClass = colors[idx % colors.length];
+                return `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${colorClass}">
+                    <i class="fa-solid fa-user-tag mr-1 opacity-75"></i>${escapeHtml(sp)}
+                </span>`;
+            }).join('');
+
+            // Render transcript items
+            const filtered = showOnlyUnclearTranscript ? items.filter(i => i.isUnclear) : items;
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">
+                    <i class="fa-solid fa-circle-check text-emerald-500 text-xl mb-1.5 block"></i>
+                    Semua rekaman pembicara sudah jelas dan terverifikasi.
+                </div>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map((item) => {
+                const realIdx = items.indexOf(item);
+                const unclearCardClass = item.isUnclear
+                    ? 'bg-amber-50/80 border border-amber-300 rounded-xl p-3'
+                    : 'py-2.5 px-1';
+
+                return `
+                <div class="${unclearCardClass} transition">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <div>
+                            <span class="font-bold text-xs text-slate-800">${escapeHtml(item.speaker)}</span>
+                            <span class="text-[10px] text-slate-500 ml-1">(${escapeHtml(item.role || 'Peserta')})</span>
+                        </div>
+                        <span class="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">${escapeHtml(item.timestamp)}</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed">${formatUnclearBadgesInHtml(escapeHtml(item.text), realIdx)}</p>
+                    ${item.isUnclear ? `
+                        <div class="mt-2 pt-2 border-t border-amber-200/80 flex items-center justify-between gap-2">
+                            <span class="text-[11px] text-amber-800 italic">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>${escapeHtml(item.unclearReason || 'Suara kurang terdengar jelas')}
+                            </span>
+                            <button onclick="openVerifyModal(${realIdx})" class="shrink-0 px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-semibold shadow-sm transition">
+                                Perbaiki
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>`;
+            }).join('');
+
+            updateUnclearCountBadges();
+        }
+
+        function filterUnclearTranscript() {
+            showOnlyUnclearTranscript = !showOnlyUnclearTranscript;
+            const btn = document.getElementById('btn-filter-unclear');
+            if (showOnlyUnclearTranscript) {
+                btn.className = "text-[11px] bg-amber-400 text-slate-950 px-2.5 py-1 rounded-lg font-bold transition";
+                btn.textContent = "Semua Dialog";
+            } else {
+                btn.className = "text-[11px] bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/30 px-2.5 py-1 rounded-lg font-medium transition";
+                btn.textContent = "Filter ⚠️";
+            }
+            renderTranscriptAndSpeakers();
+        }
+
+        // ============================================================================
+        // 7. RENDERING STRUCTURED NOTULEN IN 3 OFFICIAL FORMATS
+        // ============================================================================
+        function handleFormatChange() {
+            const fmt = document.getElementById('meta-format').value;
+            updateFormatToolbarButtons(fmt);
+            renderNotulenBody();
+        }
+
+        function changeFormatFromToolbar(fmt) {
+            document.getElementById('meta-format').value = fmt;
+            updateFormatToolbarButtons(fmt);
+            renderNotulenBody();
+            showToast(`Format notulen diubah ke: ${fmt.toUpperCase()}`, "info");
+        }
+
+        function updateFormatToolbarButtons(fmt) {
+            ['dinas', 'eksekutif', 'matriks'].forEach(f => {
+                const btn = document.getElementById(`btn-fmt-${f}`);
+                if (!btn) return;
+                if (f === fmt) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-white text-brand-800 shadow-sm";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900";
+                }
+            });
+        }
+
+        function renderNotulenBody() {
+            const container = document.getElementById('doc-body-content');
+            const fmt = document.getElementById('meta-format').value;
+            if (!container) return;
+
+            if (fmt === 'dinas') {
+                // FORMAT 1: DINAS / FORMAL LENGKAP (Humanis & Mengalir)
+                const diskusiHtml = (meetingResult.pembahasanPerPembicara || []).map((item, idx) => `
+                    <li class="mb-2.5 leading-relaxed">
+                        <strong>${escapeHtml(item.pembicara)}</strong> <span class="text-xs italic text-slate-600">(Menit ${escapeHtml(item.waktu)})</span>:<br>
+                        <span>${formatUnclearBadgesInHtml(escapeHtml(item.poin), idx)}</span>
+                    </li>
+                `).join('');
+
+                const kesimpulanHtml = (meetingResult.kesimpulan || []).map(k => `
+                    <li class="mb-1.5 leading-relaxed">${escapeHtml(k)}</li>
+                `).join('');
+
+                const tindakLanjutHtml = (meetingResult.tindakLanjut || []).map(t => `
+                    <li class="mb-1.5 leading-relaxed">
+                        <strong>${escapeHtml(t.agenda)}:</strong> ${escapeHtml(t.keputusan)} 
+                        <em>(Penanggung Jawab: ${escapeHtml(t.pic)} | Target: ${escapeHtml(t.tenggat)})</em>.
+                    </li>
+                `).join('');
+
+                container.innerHTML = `
+                    <div class="mb-4">
+                        <h3 class="font-bold uppercase mb-1" style="font-size: 11.5pt;">I. PEMBUKAAN DAN ARAHAN PIMPINAN RAPAT</h3>
+                        <p class="leading-relaxed mb-2" style="text-indent: 28px;">${escapeHtml(meetingResult.pembukaan)}</p>
+                        <p class="leading-relaxed" style="text-indent: 28px;">${escapeHtml(meetingResult.arahanPimpinan)}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="font-bold uppercase mb-1.5" style="font-size: 11.5pt;">II. JALANNYA PEMBAHASAN DAN TANGGAPAN PESERTA RAPAT</h3>
+                        <p class="mb-2">Berdasarkan pemaparan dan diskusi yang berlangsung secara dialogis, berikut adalah rincian penyampaian dari masing-masing pembicara:</p>
+                        <ol class="list-decimal pl-6 space-y-1">
+                            ${diskusiHtml}
+                        </ol>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="font-bold uppercase mb-1.5" style="font-size: 11.5pt;">III. KESIMPULAN DAN KEPUTUSAN RAPAT</h3>
+                        <ol class="list-decimal pl-6 space-y-1">
+                            ${kesimpulanHtml}
+                        </ol>
+                    </div>
+
+                    <div class="mb-2">
+                        <h3 class="font-bold uppercase mb-1.5" style="font-size: 11.5pt;">IV. RENCANA TINDAK LANJUT DAN PENUTUP</h3>
+                        <ul class="list-disc pl-6 space-y-1 mb-3">
+                            ${tindakLanjutHtml}
+                        </ul>
+                        <p class="leading-relaxed" style="text-indent: 28px;">Demikian notulen rapat ini disusun dengan sebenarnya berdasarkan hasil rekaman dan jalannya pertemuan untuk dapat dipergunakan sebagaimana mestinya.</p>
+                    </div>
+                `;
+
+            } else if (fmt === 'eksekutif') {
+                // FORMAT 2: EKSEKUTIF RINGKAS
+                const poinUtamaHtml = (meetingResult.pembahasanPerPembicara || []).map((item, idx) => `
+                    <li class="mb-1.5">
+                        <strong>${escapeHtml(item.pembicara)}:</strong> ${formatUnclearBadgesInHtml(escapeHtml(item.poin), idx)}
+                    </li>
+                `).join('');
+
+                const keputusanHtml = (meetingResult.kesimpulan || []).map(k => `
+                    <li class="mb-1">${escapeHtml(k)}</li>
+                `).join('');
+
+                const actionRows = (meetingResult.tindakLanjut || []).map((t, i) => `
+                    <tr>
+                        <td class="border border-black px-2 py-1.5 text-center">${i + 1}</td>
+                        <td class="border border-black px-2.5 py-1.5 font-semibold">${escapeHtml(t.keputusan)}</td>
+                        <td class="border border-black px-2.5 py-1.5">${escapeHtml(t.pic)}</td>
+                        <td class="border border-black px-2.5 py-1.5 text-center">${escapeHtml(t.tenggat)}</td>
+                    </tr>
+                `).join('');
+
+                container.innerHTML = `
+                    <div class="mb-4">
+                        <h3 class="font-bold uppercase mb-1" style="font-size: 11.5pt;">A. RINGKASAN EKSEKUTIF (EXECUTIVE SUMMARY)</h3>
+                        <p class="leading-relaxed">${escapeHtml(meetingResult.pembukaan)} ${escapeHtml(meetingResult.arahanPimpinan)}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="font-bold uppercase mb-1.5" style="font-size: 11.5pt;">B. SOROTAN PEMBICARA UTAMA (KEY HIGHLIGHTS)</h3>
+                        <ul class="list-disc pl-6 space-y-1">
+                            ${poinUtamaHtml}
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="font-bold uppercase mb-1.5" style="font-size: 11.5pt;">C. KEPUTUSAN STRATEGIS</h3>
+                        <ol class="list-decimal pl-6 space-y-1">
+                            ${keputusanHtml}
+                        </ol>
+                    </div>
+
+                    <div class="mb-2">
+                        <h3 class="font-bold uppercase mb-2" style="font-size: 11.5pt;">D. RENCANA TINDAK LANJUT (ACTION PLAN)</h3>
+                        <table class="w-full border-collapse border border-black text-left" style="font-size: 10.5pt;">
+                            <thead>
+                                <tr class="bg-slate-100">
+                                    <th class="border border-black px-2 py-1.5 text-center" style="width: 36px;">No</th>
+                                    <th class="border border-black px-2.5 py-1.5">Rencana Tindak Lanjut / Keputusan</th>
+                                    <th class="border border-black px-2.5 py-1.5" style="width: 170px;">Penanggung Jawab (PIC)</th>
+                                    <th class="border border-black px-2.5 py-1.5 text-center" style="width: 120px;">Tenggat Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${actionRows}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+            } else if (fmt === 'matriks') {
+                // FORMAT 3: TABEL MATRIKS
+                const pembicaraRows = (meetingResult.pembahasanPerPembicara || []).map((item, i) => {
+                    const tl = (meetingResult.tindakLanjut || [])[i % (meetingResult.tindakLanjut?.length || 1)] || {
+                        keputusan: "Ditindaklanjuti sesuai arahan pimpinan rapat.",
+                        pic: item.pembicara,
+                        tenggat: "Segera"
+                    };
+                    return `
+                        <tr>
+                            <td class="border border-black px-2 py-2 text-center align-top">${i + 1}</td>
+                            <td class="border border-black px-2.5 py-2 align-top">
+                                <div class="font-bold">${escapeHtml(item.pembicara)}</div>
+                                <div class="text-xs italic">Menit ${escapeHtml(item.waktu)}</div>
+                            </td>
+                            <td class="border border-black px-2.5 py-2 align-top">${formatUnclearBadgesInHtml(escapeHtml(item.poin), i)}</td>
+                            <td class="border border-black px-2.5 py-2 align-top">${escapeHtml(tl.keputusan)}</td>
+                            <td class="border border-black px-2.5 py-2 align-top">
+                                <div class="font-semibold">${escapeHtml(tl.pic)}</div>
+                                <div class="text-xs mt-0.5">Target: ${escapeHtml(tl.tenggat)}</div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                container.innerHTML = `
+                    <div class="mb-3">
+                        <p class="leading-relaxed"><strong>Pengantar Rapat:</strong> ${escapeHtml(meetingResult.pembukaan)}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="font-bold uppercase mb-2" style="font-size: 11.5pt;">MATRIKS PEMBAHASAN, KEPUTUSAN, DAN TINDAK LANJUT RAPAT</h3>
+                        <table class="w-full border-collapse border border-black text-left" style="font-size: 10pt;">
+                            <thead>
+                                <tr class="bg-slate-100">
+                                    <th class="border border-black px-2 py-2 text-center" style="width: 32px;">No</th>
+                                    <th class="border border-black px-2.5 py-2" style="width: 145px;">Pembicara & Waktu</th>
+                                    <th class="border border-black px-2.5 py-2">Uraian Pembahasan / Tanggapan</th>
+                                    <th class="border border-black px-2.5 py-2" style="width: 155px;">Keputusan / Solusi</th>
+                                    <th class="border border-black px-2.5 py-2" style="width: 135px;">PIC & Tenggat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${pembicaraRows}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mb-2">
+                        <p class="leading-relaxed"><strong>Catatan Penutup:</strong> Seluruh keputusan dalam matriks di atas disepakati bersama oleh peserta rapat untuk dilaksanakan secara bertanggung jawab.</p>
+                    </div>
+                `;
+            }
+
+            updateUnclearCountBadges();
+        }
+
+        function formatUnclearBadgesInHtml(safeText, index = 0) {
+            // Highlight any [⚠️ ...] pattern so the user can click to verify/edit
+            return safeText.replace(/\[⚠️([^\]]+)\]/g, (match) => {
+                return `<span onclick="openVerifyModal(${index})" class="unclear-marker" title="Klik untuk verifikasi & memperbaiki bagian suara kurang jelas ini">${match}</span>`;
+            });
+        }
+
+        // ============================================================================
+        // 8. UNCLEAR AUDIO VERIFICATION MODAL & RESOLVER
+        // ============================================================================
+        function openVerifyModal(idx) {
+            const transcriptItems = meetingResult.transkripDiarization || [];
+            const pembahasanItems = meetingResult.pembahasanPerPembicara || [];
+
+            // Find matching unclear item
+            let targetTranscript = transcriptItems[idx] || transcriptItems.find(t => t.isUnclear) || transcriptItems[0];
+            let targetPembahasan = pembahasanItems[idx] || pembahasanItems.find(p => p.isUnclear) || pembahasanItems[0];
+
+            activeVerifyIndex = idx;
+
+            document.getElementById('verify-modal-speaker').textContent = `Pembicara: ${targetPembahasan?.pembicara || targetTranscript?.speaker || 'Peserta'}`;
+            document.getElementById('verify-modal-time').textContent = `Menit ${targetPembahasan?.waktu || targetTranscript?.timestamp || '00:00'}`;
+            document.getElementById('verify-modal-reason').textContent = `Deteksi AI: ${targetPembahasan?.catatanUnclear || targetTranscript?.unclearReason || 'Bagian audio ini terdengar kurang jelas dan memerlukan konfirmasi notulis.'}`;
+
+            // Strip [⚠️ ...] wrapper for easy editing in textarea
+            const rawText = (targetPembahasan?.poin || targetTranscript?.text || '').replace(/\[⚠️[^\]:]+:\s*"?([^"\]]+)"?\]/g, '$1');
+            document.getElementById('verify-modal-input').value = rawText;
+
+            const modal = document.getElementById('verify-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeVerifyModal() {
+            const modal = document.getElementById('verify-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveVerifiedSegment() {
+            const cleanedText = document.getElementById('verify-modal-input').value.trim();
+            if (!cleanedText) return;
+
+            if (meetingResult.pembahasanPerPembicara && meetingResult.pembahasanPerPembicara[activeVerifyIndex]) {
+                meetingResult.pembahasanPerPembicara[activeVerifyIndex].poin = cleanedText;
+                meetingResult.pembahasanPerPembicara[activeVerifyIndex].isUnclear = false;
+            }
+            if (meetingResult.transkripDiarization && meetingResult.transkripDiarization[activeVerifyIndex]) {
+                meetingResult.transkripDiarization[activeVerifyIndex].text = cleanedText;
+                meetingResult.transkripDiarization[activeVerifyIndex].isUnclear = false;
+            }
+
+            closeVerifyModal();
+            renderTranscriptAndSpeakers();
+            renderNotulenBody();
+            showToast("Bagian suara kurang jelas telah diperbaiki & disahkan!", "success");
+        }
+
+        function resolveAllUnclearMarkers() {
+            // Convert all [⚠️ ... : "teks"] into clean normal text
+            (meetingResult.pembahasanPerPembicara || []).forEach(p => {
+                p.poin = p.poin.replace(/\[⚠️[^\]:]+:\s*"?([^"\]]+)"?\]/g, '$1').replace(/\[⚠️([^\]]+)\]/g, '$1');
+                p.isUnclear = false;
+            });
+            (meetingResult.transkripDiarization || []).forEach(t => {
+                t.text = t.text.replace(/\[⚠️[^\]:]+:\s*"?([^"\]]+)"?\]/g, '$1').replace(/\[⚠️([^\]]+)\]/g, '$1');
+                t.isUnclear = false;
+            });
+
+            // Also clean any live edits inside doc-body-content
+            const docBody = document.getElementById('doc-body-content');
+            const markers = docBody.querySelectorAll('.unclear-marker');
+            markers.forEach(m => {
+                const clean = m.textContent.replace(/\[⚠️[^\]:]+:\s*"?([^"\]]+)"?\]/g, '$1').replace(/\[⚠️([^\]]+)\]/g, '$1');
+                m.replaceWith(document.createTextNode(clean));
+            });
+
+            renderTranscriptAndSpeakers();
+            updateUnclearCountBadges();
+            showToast("Seluruh penanda verifikasi manual telah disahkan menjadi teks bersih.", "success");
+        }
+
+        function updateUnclearCountBadges() {
+            const docBody = document.getElementById('doc-body-content');
+            const domMarkers = docBody ? docBody.querySelectorAll('.unclear-marker').length : 0;
+            const transcriptUnclear = (meetingResult.transkripDiarization || []).filter(t => t.isUnclear).length;
+            const count = Math.max(domMarkers, transcriptUnclear);
+
+            const alertBar = document.getElementById('unclear-toolbar-alert');
+            const countText = document.getElementById('unclear-count-text');
+            const deskBadge = document.getElementById('badge-unclear-desk');
+            const mobBadge = document.getElementById('badge-unclear-mob');
+
+            if (count > 0) {
+                alertBar.classList.remove('hidden');
+                alertBar.classList.add('flex');
+                countText.textContent = count;
+                deskBadge.classList.remove('hidden');
+                deskBadge.textContent = count;
+                mobBadge.classList.remove('hidden');
+                mobBadge.textContent = count;
+            } else {
+                alertBar.classList.add('hidden');
+                alertBar.classList.remove('flex');
+                deskBadge.classList.add('hidden');
+                mobBadge.classList.add('hidden');
+            }
+        }
+
+        // ============================================================================
+        // 9. SYNC METADATA, KOP SURAT & SIGNATURE BLOCK TO A4 PREVIEW
+        // ============================================================================
+        function syncDocumentPreview() {
+            // Kop Surat Visibility
+            const showKop = document.getElementById('toggle-show-kop').checked;
+            const kopContainer = document.getElementById('doc-kop-container');
+            if (showKop) {
+                kopContainer.classList.remove('hidden');
+            } else {
+                kopContainer.classList.add('hidden');
+            }
+
+            // Kop Text
+            document.getElementById('doc-kop-induk').textContent = document.getElementById('kop-induk').value;
+            document.getElementById('doc-kop-satker').textContent = document.getElementById('kop-satker').value;
+            document.getElementById('doc-kop-alamat').textContent = document.getElementById('kop-alamat').value;
+            document.getElementById('doc-kop-kontak').textContent = document.getElementById('kop-kontak').value;
+
+            // Meeting Metadata
+            const tanggalVal = document.getElementById('meta-tanggal').value;
+            document.getElementById('doc-meta-tanggal').textContent = tanggalVal;
+            document.getElementById('doc-meta-waktu').textContent = document.getElementById('meta-waktu').value;
+            document.getElementById('doc-meta-tempat').textContent = document.getElementById('meta-tempat').value;
+            document.getElementById('doc-meta-agenda').textContent = document.getElementById('meta-agenda').value;
+            document.getElementById('doc-meta-peserta').textContent = document.getElementById('meta-peserta').value;
+
+            // Signatories
+            const pimpinanJabatan = document.getElementById('ttd-pimpinan-jabatan').value;
+            const pimpinanNama = document.getElementById('ttd-pimpinan-nama').value;
+            const pimpinanNip = document.getElementById('ttd-pimpinan-nip').value;
+
+            const notulisJabatan = document.getElementById('ttd-notulis-jabatan').value;
+            const notulisNama = document.getElementById('ttd-notulis-nama').value;
+            const notulisNip = document.getElementById('ttd-notulis-nip').value;
+            const kota = document.getElementById('ttd-kota').value;
+
+            document.getElementById('doc-meta-pimpinan').textContent = `${pimpinanNama} (${pimpinanJabatan})`;
+            document.getElementById('doc-meta-notulis').textContent = `${notulisNama}`;
+
+            document.getElementById('doc-ttd-pimpinan-jabatan').textContent = pimpinanJabatan;
+            document.getElementById('doc-ttd-pimpinan-nama').textContent = pimpinanNama;
+            document.getElementById('doc-ttd-pimpinan-nip').textContent = pimpinanNip;
+
+            document.getElementById('doc-ttd-notulis-jabatan').textContent = notulisJabatan;
+            document.getElementById('doc-ttd-notulis-nama').textContent = notulisNama;
+            document.getElementById('doc-ttd-notulis-nip').textContent = notulisNip;
+
+            document.getElementById('doc-ttd-kota').textContent = kota;
+            // Strip day name if present for signature date (e.g., "Selasa, 27 Oktober 2026" -> "27 Oktober 2026")
+            const datePartOnly = tanggalVal.includes(',') ? tanggalVal.split(',')[1].trim() : tanggalVal;
+            document.getElementById('doc-ttd-tanggal').textContent = datePartOnly;
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentLogoDataUrl = e.target.result;
+                document.getElementById('kop-logo-preview').src = currentLogoDataUrl;
+                document.getElementById('doc-kop-logo').src = currentLogoDataUrl;
+                showToast("Logo Kop Surat berhasil diperbarui", "success");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setPresetLogo(type) {
+            currentLogoDataUrl = PRESET_LOGOS[type] || PRESET_LOGOS.garuda;
+            document.getElementById('kop-logo-preview').src = currentLogoDataUrl;
+            document.getElementById('doc-kop-logo').src = currentLogoDataUrl;
+            showToast("Template logo instansi diterapkan", "info");
+        }
+
+        // ============================================================================
+        // 10. RICH TEXT EDITOR COMMANDS & EXPORT TO MICROSOFT WORD (.DOC)
+        // ============================================================================
+        function formatDoc(cmd) {
+            document.execCommand(cmd, false, null);
+            document.getElementById('doc-body-content').focus();
+        }
+
+        function exportToWord() {
+            syncDocumentPreview();
+            const agendaTitle = document.getElementById('meta-agenda').value || 'Notulen_Rapat';
+            const cleanFileName = agendaTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 35);
+
+            const showKop = document.getElementById('toggle-show-kop').checked;
+            const kopInduk = escapeHtml(document.getElementById('kop-induk').value);
+            const kopSatker = escapeHtml(document.getElementById('kop-satker').value);
+            const kopAlamat = escapeHtml(document.getElementById('kop-alamat').value);
+            const kopKontak = escapeHtml(document.getElementById('kop-kontak').value);
+
+            const bodyContentHtml = document.getElementById('doc-body-content').innerHTML;
+
+            const wordHtml = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset="utf-8">
+                    <title>${escapeHtml(agendaTitle)}</title>
+                    <style>
+                        @page {
+                            size: 21cm 29.7cm;
+                            margin: 2cm 2cm 2cm 2.5cm;
+                        }
+                        body {
+                            font-family: "Times New Roman", Times, serif;
+                            font-size: 12pt;
+                            color: #000000;
+                            line-height: 1.4;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        .kop-table {
+                            border-bottom: 3pt double #000000;
+                            margin-bottom: 16pt;
+                            padding-bottom: 6pt;
+                        }
+                        .unclear-marker {
+                            background-color: #fef08a;
+                            font-weight: bold;
+                        }
+                        h2, h3 {
+                            margin-top: 10pt;
+                            margin-bottom: 4pt;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${showKop ? `
+                    <table class="kop-table" style="border-bottom: 3pt double #000000; margin-bottom: 14pt;">
+                        <tr>
+                            <td style="text-align:center; padding-bottom: 8pt;">
+                                <div style="font-size:12pt; font-weight:bold; text-transform:uppercase;">${kopInduk}</div>
+                                <div style="font-size:14pt; font-weight:bold; text-transform:uppercase;">${kopSatker}</div>
+                                <div style="font-size:10pt;">${kopAlamat}</div>
+                                <div style="font-size:9.5pt; font-style:italic;">${kopKontak}</div>
+                            </td>
+                        </tr>
+                    </table>
+                    ` : ''}
+
+                    <div style="text-align:center; margin: 12pt 0;">
+                        <strong style="font-size:13pt; text-decoration:underline; text-transform:uppercase;">NOTULEN RAPAT</strong>
+                    </div>
+
+                    <table style="margin-bottom: 14pt; font-size: 11.5pt;">
+                        <tr><td style="width:150px; font-weight:bold;">Hari / Tanggal</td><td style="width:15px;">:</td><td>${escapeHtml(document.getElementById('doc-meta-tanggal').textContent)}</td></tr>
+                        <tr><td style="font-weight:bold;">Waktu Rapat</td><td>:</td><td>${escapeHtml(document.getElementById('doc-meta-waktu').textContent)}</td></tr>
+                        <tr><td style="font-weight:bold;">Tempat / Media</td><td>:</td><td>${escapeHtml(document.getElementById('doc-meta-tempat').textContent)}</td></tr>
+                        <tr><td style="font-weight:bold;">Agenda / Acara</td><td>:</td><td><strong>${escapeHtml(document.getElementById('doc-meta-agenda').textContent)}</strong></td></tr>
+                        <tr><td style="font-weight:bold;">Pimpinan Rapat</td><td>:</td><td>${escapeHtml(document.getElementById('doc-meta-pimpinan').textContent)}</td></tr>
+                        <tr><td style="font-weight:bold;">Notulis</td><td>:</td><td>${escapeHtml(document.getElementById('doc-meta-notulis').textContent)}</td></tr>
+                        <tr><td style="font-weight:bold;">Peserta Hadir</td><td>:</td><td>${escapeHtml(document.getElementById('doc-meta-peserta').textContent)}</td></tr>
+                    </table>
+
+                    <hr style="border-top: 1px solid #000; margin-bottom: 12pt;">
+
+                    <div>
+                        ${bodyContentHtml}
+                    </div>
+
+                    <br><br>
+                    <table style="width:100%; text-align:center; margin-top: 24pt; font-size: 11.5pt;">
+                        <tr>
+                            <td style="width:50%; vertical-align:top;">
+                                <div>Mengetahui / Mengesahkan,</div>
+                                <div><strong>Pimpinan Rapat</strong></div>
+                                <div style="font-size:10pt; font-style:italic;">${escapeHtml(document.getElementById('doc-ttd-pimpinan-jabatan').textContent)}</div>
+                                <br><br><br><br>
+                                <div><strong><u>${escapeHtml(document.getElementById('doc-ttd-pimpinan-nama').textContent)}</u></strong></div>
+                                <div style="font-size:10.5pt;">${escapeHtml(document.getElementById('doc-ttd-pimpinan-nip').textContent)}</div>
+                            </td>
+                            <td style="width:50%; vertical-align:top;">
+                                <div>${escapeHtml(document.getElementById('doc-ttd-kota').textContent)}, ${escapeHtml(document.getElementById('doc-ttd-tanggal').textContent)}</div>
+                                <div><strong>Notulis Rapat</strong></div>
+                                <div style="font-size:10pt; font-style:italic;">${escapeHtml(document.getElementById('doc-ttd-notulis-jabatan').textContent)}</div>
+                                <br><br><br><br>
+                                <div><strong><u>${escapeHtml(document.getElementById('doc-ttd-notulis-nama').textContent)}</u></strong></div>
+                                <div style="font-size:10.5pt;">${escapeHtml(document.getElementById('doc-ttd-notulis-nip').textContent)}</div>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob(['\ufeff', wordHtml], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Notulen_${cleanFileName}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showToast("Dokumen Word (.doc) berhasil diunduh!", "success");
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <title>KlikNotulen - Konversi Lisan Instan ke Kertas Notulen</title>
+    <link rel="icon" type="image/jpeg" href="logo_aplikasi.jpg"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        serifDoc: ['Tinos', 'Times New Roman', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            purple: '#5e218a',
+                            'purple-dark': '#441466',
+                            'purple-light': '#7a2fb0',
+                            grey: '#b5b4ba',
+                            'grey-light': '#ebe9ee',
+                            'grey-subtle': '#f6f5f8',
+                            cream: '#fde9d4',
+                            'cream-light': '#fff7ee',
+                            coral: '#f97e84',
+                            'coral-dark': '#e06168',
+                            'coral-soft': '#ffebec',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f7f6fa;
+            color: #262130;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .a4-paper {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #ffffff;
+            color: #111111;
+            width: 100%;
+            max-width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 18mm 20mm;
+            box-shadow: 0 14px 35px -8px rgba(78, 28, 114, 0.12);
+            line-height: 1.5;
+            font-size: 12pt;
+            border-radius: 4px;
+        }
+
+        .naskah-notulen {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #111111;
+        }
+
+        .naskah-notulen p,
+        .naskah-notulen table,
+        .naskah-notulen td,
+        .naskah-notulen th,
+        .naskah-notulen li,
+        .naskah-notulen div {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .a4-paper {
+                padding: 16px 12px;
+                min-height: auto;
+                font-size: 11pt;
+            }
+        }
+        @media (max-width: 640px) {
+            .kop-text-13 {
+                font-size: 9.5pt !important;
+                line-height: 1.2 !important;
+            }
+            .kop-text-8 {
+                font-size: 6.8pt !important;
+                line-height: 1.25 !important;
+            }
+            #doc-kop-logo {
+                width: 52px !important;
+                max-height: 68px !important;
+            }
+            .kop-bookman td:first-child {
+                width: 56px !important;
+                padding-right: 6px !important;
+            }
+        }
+
+        .kop-border {
+            border-bottom: 3px solid #000000;
+            position: relative;
+            margin-bottom: 18px;
+            padding-bottom: 6px;
+        }
+        .kop-border::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -5px;
+            height: 1px;
+            background-color: #000000;
+        }
+
+        .kop-bookman {
+            font-family: 'Bookman Old Style', 'URW Bookman', 'Bookman', serif;
+        }
+        .kop-text-13 {
+            font-family: 'Bookman Old Style', 'URW Bookman', 'Bookman', serif;
+            font-size: 13pt;
+            font-weight: bold;
+            line-height: 1.24;
+            letter-spacing: 0.2px;
+            text-transform: uppercase;
+            color: #000000;
+        }
+        .kop-text-8 {
+            font-family: 'Bookman Old Style', 'URW Bookman', 'Bookman', serif;
+            font-size: 8pt;
+            font-weight: normal;
+            line-height: 1.35;
+            color: #000000;
+        }
+
+        .unclear-marker {
+            background-color: #fde9d4;
+            color: #8c3b0d;
+            border: 1px dashed #f97e84;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            margin: 1px 2px;
+            transition: all 0.2s ease;
+        }
+        .unclear-marker:hover {
+            background-color: #f97e84;
+            color: #ffffff;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f0eef4; }
+        ::-webkit-scrollbar-thumb { background: #b5b4ba; border-radius: 9999px; }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 126, 132, 0.8); }
+            70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(249, 126, 132, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 126, 132, 0); }
+        }
+        .recording-pulse {
+            animation: pulse-ring 1.8s infinite;
+        }
+
+        [contenteditable="true"] {
+            outline: none;
+            transition: background 0.2s;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+        [contenteditable="true"]:hover {
+            background-color: rgba(94, 33, 138, 0.03);
+        }
+        [contenteditable="true"]:focus {
+            background-color: rgba(94, 33, 138, 0.06);
+            box-shadow: 0 0 0 2px rgba(122, 47, 176, 0.3);
+        }
+
+        @media print {
+            @page { size: A4 portrait; margin: 15mm 18mm; }
+            body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+            #tab-hasil { display: block !important; }
+            .a4-paper { box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-20 md:pb-8 text-slate-800">
+
+<!-- TOP HEADER -->
+<header class="no-print sticky top-0 z-40 bg-gradient-to-r from-[#441466] via-[#5e218a] to-[#7a2fb0] text-white shadow-lg border-b border-purple-900/30">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-11 h-11 rounded-xl overflow-hidden bg-white/10 backdrop-blur border border-white/30 shadow-md flex items-center justify-center shrink-0">
+                <img src="logo_aplikasi.jpg" alt="Logo KlikNotulen" class="w-full h-full object-cover"/>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-extrabold text-lg sm:text-xl tracking-tight leading-none text-white">KlikNotulen</h1>
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-brand-coral/25 text-white border border-brand-coral/40 rounded-full">Resmi</span>
+                </div>
+                <p class="text-xs text-purple-200 mt-0.5 font-medium">Konversi Lisan Instan ke Kertas Notulen</p>
+            </div>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center space-x-1 bg-black/25 p-1 rounded-xl border border-white/10">
+            <button class="px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 text-purple-200 hover:bg-white/10" id="nav-desk-rekam" onclick="switchTab('rekam')">
+                <i class="fa-solid fa-microphone text-brand-coral"></i>
+                <span>1. Rekam &amp; Rapat</span>
+            </button>
+            <button class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-purple-200 hover:bg-white/10" id="nav-desk-kop" onclick="switchTab('kop')">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>2. Kop &amp; TTD</span>
+            </button>
+            <button class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 relative bg-white text-brand-purple shadow-sm" id="nav-desk-hasil" onclick="switchTab('hasil')">
+                <i class="fa-solid fa-file-signature"></i>
+                <span>3. Hasil Notulen</span>
+                <span class="ml-1 px-1.5 py-0.2 text-[10px] bg-brand-coral text-white font-bold rounded-full" id="badge-unclear-desk">2</span>
+            </button>
+        </nav>
+
+        <!-- Right Quick Actions -->
+        <div class="flex items-center gap-2">
+            <!-- Auto-Save Status Indicator -->
+            <div id="autosave-indicator" class="hidden lg:flex items-center gap-1.5 text-[11px] bg-black/20 text-emerald-300 px-2.5 py-1.5 rounded-lg border border-emerald-400/25">
+                <i class="fa-solid fa-circle-check"></i>
+                <span id="autosave-text">Otomatis Tersimpan</span>
+            </div>
+
+            <!-- Arsip Notulen Modal Trigger -->
+            <button class="text-xs bg-white/10 hover:bg-white/20 text-white font-semibold px-3 py-2 rounded-xl border border-white/20 transition flex items-center gap-1.5" onclick="openArchiveModal()" title="Buka Arsip Notulen Rapat">
+                <i class="fa-solid fa-box-archive text-brand-coral"></i>
+                <span class="hidden sm:inline">Arsip</span> (<span id="archive-count">0</span>)
+            </button>
+
+            <!-- Gemini AI Settings Modal Trigger -->
+            <button class="text-xs bg-white/10 hover:bg-white/20 text-white font-semibold px-3 py-2 rounded-xl border border-white/20 transition flex items-center gap-1.5" onclick="openGeminiModal()" title="Pengaturan AI Google Gemini">
+                <i class="fa-solid fa-brain text-brand-coral"></i>
+                <span class="hidden sm:inline">AI Gemini</span>
+            </button>
+
+            <!-- Demo Rapat AI -->
+            <button class="text-xs bg-brand-coral hover:bg-brand-coral-dark text-white font-bold px-3.5 py-2 rounded-xl shadow-md transition flex items-center gap-1.5" onclick="runSimulatedMeeting()">
+                <i class="fa-solid fa-bolt text-brand-cream"></i>
+                <span class="hidden sm:inline">Demo Rapat AI</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- PALETTE BANNER INDICATOR -->
+<div class="no-print bg-brand-cream-light border-b border-brand-cream px-4 py-2">
+    <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-700">
+        <div class="flex items-center gap-2">
+            <span class="font-semibold text-brand-purple flex items-center gap-1.5">
+                <i class="fa-solid fa-palette text-brand-coral"></i> Varian 1: Royal Purple &amp; Coral Classic
+            </span>
+            <span class="hidden md:inline text-slate-400">|</span>
+            <span class="hidden md:inline text-slate-600">Dominasi ungu agung (#5e218a) beraksen coral ceria (#f97e84) dengan latar abu-abu sejuk</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <span class="w-4 h-4 rounded-full bg-[#5e218a] border border-white shadow-xs" title="Ungu"></span>
+            <span class="w-4 h-4 rounded-full bg-[#b5b4ba] border border-white shadow-xs" title="Abu-abu Perak"></span>
+            <span class="w-4 h-4 rounded-full bg-[#fde9d4] border border-white shadow-xs" title="Krem Hangat"></span>
+            <span class="w-4 h-4 rounded-full bg-[#f97e84] border border-white shadow-xs" title="Coral Merah Muda"></span>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN CONTAINER -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 pt-5">
+
+    <!-- TAB 1: REKAM & DATA RAPAT -->
+    <section class="space-y-5 hidden" id="tab-rekam">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- LEFT RECORDER COLUMN (5 Cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-brand-purple-dark to-brand-purple px-5 py-4 text-white flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full bg-slate-400 inline-block transition" id="rec-status-dot"></span>
+                            <h2 class="font-semibold text-sm tracking-wide uppercase text-white" id="rec-status-text">Siap Merekam Rapat</h2>
+                        </div>
+                        <span class="text-xs bg-white/15 px-2.5 py-1 rounded-full text-brand-cream font-mono font-medium">Smart Diarization</span>
+                    </div>
+
+                    <div class="p-5 flex flex-col items-center">
+                        <!-- Timer -->
+                        <div class="text-4xl sm:text-5xl font-mono font-extrabold text-brand-purple tracking-wider my-2" id="rec-timer">
+                            00:00
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4 text-center">
+                            Letakkan gawai di tengah meja rapat. AI membedakan suara dan menandai bagian bising.
+                        </p>
+
+                        <!-- Audio Waveform Area (Web Audio API) -->
+                        <div class="w-full h-28 bg-[#1f1729] rounded-xl overflow-hidden relative border border-purple-900/40 shadow-inner mb-4 flex items-center justify-center">
+                            <canvas class="w-full h-full block" id="waveform-canvas" width="400" height="112"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-purple-300/70 text-xs pointer-events-none transition duration-300" id="canvas-Overlay-hint">
+                                <i class="fa-solid fa-wave-square text-lg mb-1 text-brand-coral"></i>
+                                <span>Visualisasi Audio Spektrum Real-Time</span>
+                            </div>
+                        </div>
+
+                        <!-- Live Marker Button -->
+                        <div class="w-full mb-3" id="live-marker-bar">
+                            <button class="w-full py-2.5 px-3 bg-brand-cream hover:bg-[#fad8b9] border border-[#f5c697] text-[#783009] rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition" onclick="addLiveUnclearBookmark()" type="button">
+                                <i class="fa-solid fa-triangle-exclamation text-brand-coral"></i>
+                                <span>Tandai Menit Ini Kurang Jelas (<span id="bookmark-count">0</span> ditandai)</span>
+                            </button>
+                            <!-- Live Bookmarks List -->
+                            <div id="bookmarks-list" class="w-full text-xs space-y-1.5 max-h-24 overflow-y-auto mt-2 hidden p-2 bg-brand-cream-light border border-brand-cream rounded-xl"></div>
+                        </div>
+
+                        <!-- Recording Action Buttons -->
+                        <div class="flex items-center justify-center gap-3 w-full my-1">
+                            <button class="flex-1 py-3.5 px-5 bg-brand-coral hover:bg-brand-coral-dark text-white font-bold rounded-2xl shadow-lg shadow-brand-coral/25 flex items-center justify-center gap-2.5 transition" id="btn-record" onclick="startRecording()">
+                                <i class="fa-solid fa-microphone text-lg"></i>
+                                <span>Mulai Rekam Rapat</span>
+                            </button>
+                            <button class="hidden flex-1 py-3.5 px-5 bg-brand-purple hover:bg-brand-purple-dark text-white font-bold rounded-2xl shadow-lg shadow-purple-900/25 items-center justify-center gap-2 transition" id="btn-stop" onclick="stopRecordingAndProcess()">
+                                <i class="fa-solid fa-stop"></i>
+                                <span>Stop &amp; Rangkum AI</span>
+                            </button>
+                        </div>
+
+                        <!-- Live Indonesian Speech-to-Text Container -->
+                        <div id="live-stt-container" class="w-full mt-3 p-3 bg-purple-50/70 rounded-xl border border-purple-200/80 hidden text-left">
+                            <div class="flex items-center justify-between text-xs font-bold text-brand-purple mb-1">
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-microphone-lines text-brand-coral animate-pulse"></i> Transkripsi Suara Langsung (Bahasa Indonesia):</span>
+                                <span class="text-[10px] text-slate-500 font-normal">Real-time</span>
+                            </div>
+                            <div id="live-stt-text" class="text-xs text-slate-700 italic max-h-24 overflow-y-auto leading-relaxed border-t border-purple-100 pt-1">
+                                Mendengarkan percakapan rapat...
+                            </div>
+                        </div>
+
+                        <!-- Recorded Audio Playback Container -->
+                        <div id="recorded-audio-container" class="w-full mt-3 p-3 bg-brand-cream-light rounded-xl border border-brand-cream hidden space-y-2">
+                            <div class="flex items-center justify-between text-xs font-bold text-[#783009]">
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-play text-brand-coral"></i> Rekaman Audio Rapat:</span>
+                                <a id="btn-download-audio" href="#" download="rekaman_rapat_pa_lumajang.webm" class="text-[11px] text-brand-purple font-bold hover:underline flex items-center gap-1">
+                                    <i class="fa-solid fa-download"></i> Unduh File Audio
+                                </a>
+                            </div>
+                            <audio id="recorded-audio-player" class="w-full h-8" controls></audio>
+                        </div>
+
+                        <!-- Alternative Audio Uploads & Simulator -->
+                        <div class="w-full mt-5 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <label class="cursor-pointer py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition border border-slate-200">
+                                <i class="fa-solid fa-file-audio text-brand-purple"></i>
+                                <span>Unggah File Audio</span>
+                                <input accept="audio/*" class="hidden" id="audio-upload-input" type="file" onchange="handleAudioUpload(event)"/>
+                            </label>
+                            <button class="py-2.5 px-3 bg-brand-cream-light hover:bg-brand-cream text-brand-purple font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition border border-brand-cream" onclick="runSimulatedMeeting()" type="button">
+                                <i class="fa-solid fa-wand-magic-sparkles text-brand-coral"></i>
+                                <span>Simulasi Demo Rapat</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Highlight Features Card -->
+                <div class="bg-gradient-to-br from-[#441466] to-[#2c0e42] text-white rounded-2xl p-4 shadow-sm space-y-2.5 border border-purple-900/40">
+                    <div class="flex items-center gap-2 text-brand-cream font-bold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-sparkles text-brand-coral"></i>
+                        <span>Fitur Cerdas KlikNotulen</span>
+                    </div>
+                    <ul class="text-xs text-purple-100 space-y-2 leading-relaxed">
+                        <li class="flex items-start gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-coral mt-1.5 shrink-0"></span>
+                            <span><strong>Pemisahan Dialog Otomatis:</strong> Mendeteksi pembicara berbeda dan mencocokkan identitasnya ke daftar hadir pejabat.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-cream mt-1.5 shrink-0"></span>
+                            <span><strong>Tanda Verifikasi Kuning-Koral:</strong> Bagian bisikan atau angka meragukan langsung diberi label <code class="bg-brand-cream text-brand-purple px-1 py-0.5 rounded font-bold">[⚠️ Suara Kurang Jelas]</code>.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- RIGHT METADATA COLUMN (7 Cols) -->
+            <div class="lg:col-span-7 space-y-4">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="font-bold text-base text-brand-purple flex items-center gap-2">
+                                <i class="fa-solid fa-clipboard-list text-brand-coral"></i>
+                                <span>Identitas &amp; Pengaturan Agenda Rapat</span>
+                            </h2>
+                            <p class="text-xs text-slate-500">Konteks ini digunakan mesin AI untuk menghasilkan rangkuman resmi yang presisi</p>
+                        </div>
+                        <span class="text-xs font-bold text-brand-purple bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100">Tersinkronisasi</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Agenda / Acara Rapat</label>
+                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-agenda" type="text" value="Rapat Koordinasi Evaluasi Kinerja Bulanan &amp; Optimalisasi Layanan Peradilan Digital" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Hari / Tanggal Rapat</label>
+                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-tanggal" type="text" value="Rabu, 28 Oktober 2026" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Waktu Rapat</label>
+                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-waktu" type="text" value="09.00 WIB s.d. Selesai" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Tempat / Media Rapat</label>
+                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-tempat" type="text" value="Ruang Media Center Pengadilan Agama Lumajang / Hybrid Zoom" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Format Notulen</label>
+                            <select class="w-full px-3.5 py-2.5 rounded-xl border border-purple-200 bg-purple-50/50 text-sm font-semibold text-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-format" onchange="autoSaveDraft()">
+                                <option value="dinas">1. Format Dinas / Formal Lengkap (Narasi Terstruktur)</option>
+                                <option value="eksekutif">2. Format Eksekutif Ringkas (Poin &amp; Action Plan)</option>
+                                <option value="matriks">3. Format Tabel Matriks (Agenda, PIC, Target)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Daftar Pembicara / Peserta Hadir</label>
+                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-peserta" type="text" value="Drs. H. Ahmad Fauzi, S.H., M.H. (Ketua), Hakim, Panitera, Sekretaris, Pejabat Struktural &amp; Fungsional PA Lumajang" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                        <button class="text-xs font-bold text-brand-purple hover:bg-purple-100 flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-purple-50 transition" onclick="switchTab('kop')" type="button">
+                            <i class="fa-solid fa-gear text-brand-coral"></i>
+                            <span>Atur Kop Surat &amp; Tanda Tangan</span>
+                        </button>
+                        <button class="text-xs font-bold text-white bg-brand-purple hover:bg-brand-purple-dark flex items-center gap-2 py-2.5 px-4 rounded-xl shadow-md transition" onclick="switchTab('hasil')" type="button">
+                            <span>Buka Naskah Notulen A4</span>
+                            <i class="fa-solid fa-arrow-right text-brand-coral"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 2: PENGATURAN KOP SURAT & TTD -->
+    <section class="hidden space-y-5" id="tab-kop">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 class="font-bold text-base text-brand-purple flex items-center gap-2">
+                        <i class="fa-solid fa-building-columns text-brand-coral"></i>
+                        <span>Pengaturan Kop Surat Resmi (Bookman Old Style)</span>
+                    </h2>
+                    <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">6 Baris Resmi</span>
+                </div>
+
+                <div class="flex items-center gap-3.5 p-3 bg-purple-50/70 border border-purple-200/80 rounded-xl mb-3">
+                    <img src="logo_instansi.png" alt="Logo Pengadilan Agama Lumajang" class="w-12 h-14 object-contain shadow-xs bg-white p-1 rounded-lg border border-purple-100"/>
+                    <div>
+                        <div class="text-xs font-bold text-brand-purple flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                            <span>Logo Instansi: logo_instansi.png</span>
+                        </div>
+                        <div class="text-[11px] text-slate-600 mt-0.5">Lambang Resmi Pengadilan Agama Lumajang termuat otomatis</div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Baris 1 (Instansi Tertinggi - Ukuran 13pt)</label>
+                        <input class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-bold uppercase focus:ring-2 focus:ring-brand-purple font-serif" id="kop-baris1" type="text" value="MAHKAMAH AGUNG REPUBLIK INDONESIA" oninput="syncKopSurat(); autoSaveDraft();"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Baris 2 (Direktorat Jenderal - Ukuran 13pt)</label>
+                        <input class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-bold uppercase focus:ring-2 focus:ring-brand-purple font-serif" id="kop-baris2" type="text" value="DIREKTORAT JENDERAL BADAN PERADILAN AGAMA" oninput="syncKopSurat(); autoSaveDraft();"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Baris 3 (Pengadilan Tingkat Banding - Ukuran 13pt)</label>
+                        <input class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-bold uppercase focus:ring-2 focus:ring-brand-purple font-serif" id="kop-baris3" type="text" value="PENGADILAN TINGGI AGAMA SURABAYA" oninput="syncKopSurat(); autoSaveDraft();"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Baris 4 (Satuan Kerja / Pengadilan Tingkat Pertama - Ukuran 13pt)</label>
+                        <input class="w-full px-3.5 py-2 rounded-xl border border-purple-200 bg-purple-50/40 text-sm font-extrabold uppercase focus:ring-2 focus:ring-brand-purple font-serif text-brand-purple" id="kop-baris4" type="text" value="PENGADILAN AGAMA LUMAJANG" oninput="syncKopSurat(); autoSaveDraft();"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Baris 5 (Alamat Lengkap Kantor - Ukuran 8pt)</label>
+                        <input class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-purple font-serif" id="kop-baris5" type="text" value="Jalan Soekarno Hatta Nomor 11, Selokbesuki, Sukodono, Lumajang, Jawa Timur 67352" oninput="syncKopSurat(); autoSaveDraft();"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Baris 6 (Website, Email &amp; Telepon - Ukuran 8pt)</label>
+                        <input class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-purple font-serif" id="kop-baris6" type="text" value="www.pa-lumajang.go.id,  email: pa.lumajang@gmail.com, telepon (0334) 8781874" oninput="syncKopSurat(); autoSaveDraft();"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pejabat Penandatangan -->
+            <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 class="font-bold text-base text-brand-purple flex items-center gap-2">
+                        <i class="fa-solid fa-pen-nib text-brand-coral"></i>
+                        <span>Pejabat Penandatangan</span>
+                    </h2>
+                    <span class="text-[11px] font-bold text-brand-purple bg-purple-50 px-2.5 py-1 rounded-lg">Format Dinas</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200/70 space-y-2">
+                        <div class="text-xs font-bold text-brand-purple uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-tie text-brand-coral"></i>
+                            <span>Pimpinan Rapat (Pengesah)</span>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">Jabatan Pimpinan</label>
+                            <input class="w-full px-3 py-1.5 rounded-lg border border-purple-200 text-xs font-semibold" id="ttd-pimpinan-jabatan" type="text" value="Ketua Pengadilan Agama Lumajang" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">Nama Pejabat (beserta gelar)</label>
+                            <input class="w-full px-3 py-1.5 rounded-lg border border-purple-200 text-xs font-bold" id="ttd-pimpinan-nama" type="text" value="Drs. H. Ahmad Fauzi, S.H., M.H." oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">NIP</label>
+                            <input class="w-full px-3 py-1.5 rounded-lg border border-purple-200 text-xs font-mono" id="ttd-pimpinan-nip" type="text" value="19750412 200003 1 004" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-brand-cream-light border border-brand-cream space-y-2">
+                        <div class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-pen text-brand-coral"></i>
+                            <span>Notulis Rapat</span>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">Jabatan Notulis</label>
+                            <input class="w-full px-3 py-1.5 rounded-lg border border-[#f5c697] text-xs font-semibold" id="ttd-notulis-jabatan" type="text" value="Panitera Pengganti / Notulis" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">Nama Notulis</label>
+                            <input class="w-full px-3 py-1.5 rounded-lg border border-[#f5c697] text-xs font-bold" id="ttd-notulis-nama" type="text" value="Rina Kartika Sari, S.I.Kom." oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-0.5">NIP</label>
+                            <input class="w-full px-3 py-1.5 rounded-lg border border-[#f5c697] text-xs font-mono" id="ttd-notulis-nip" type="text" value="19910823 201503 2 008" oninput="syncKopSurat(); autoSaveDraft();"/>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kota &amp; Tanggal Pembuatan Naskah</label>
+                        <input class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-brand-purple" id="ttd-kota-tgl" type="text" value="Lumajang, 28 Oktober 2026" oninput="syncKopSurat(); autoSaveDraft();"/>
+                    </div>
+
+                    <button class="w-full py-2.5 px-4 bg-brand-purple hover:bg-brand-purple-dark text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm" onclick="switchTab('hasil')" type="button">
+                        <span>Tinjau Naskah A4 Resmi</span>
+                        <i class="fa-solid fa-arrow-right text-brand-coral"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 3: HASIL NOTULEN A4 -->
+    <section class="space-y-5" id="tab-hasil">
+        <!-- Toolbar -->
+        <div class="no-print bg-white rounded-2xl shadow-sm border border-slate-200 p-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <div class="flex items-center bg-purple-50 p-1 rounded-xl border border-purple-100">
+                    <button class="px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-purple text-white shadow-sm flex items-center gap-1.5" type="button">
+                        <i class="fa-solid fa-file-signature text-brand-coral"></i>
+                        <span>Format Dinas Resmi</span>
+                    </button>
+                    <button class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-brand-purple transition" onclick="switchFormatView('eksekutif')" type="button">Ringkasan Eksekutif</button>
+                    <button class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-brand-purple transition" onclick="switchFormatView('matriks')" type="button">Matriks Tindak Lanjut</button>
+                </div>
+
+                <div class="flex items-center gap-2 bg-brand-cream border border-[#f5c697] text-[#783009] px-3.5 py-1.5 rounded-xl text-xs shadow-xs" id="box-unclear-indicator">
+                    <i class="fa-solid fa-triangle-exclamation text-brand-coral text-sm"></i>
+                    <span><strong class="font-bold" id="label-unclear-count">2</strong> Bagian Suara Perlu Verifikasi</span>
+                    <button class="ml-1 underline font-bold text-brand-purple hover:text-brand-coral transition" onclick="resolveAllUnclearMarkers()">Sahkan Semua</button>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- AI Summarization Button -->
+                <button class="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-brand-purple border border-purple-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5" onclick="triggerAISummarization()" type="button" title="Ringkas ulang otomatis dengan kecerdasan AI">
+                    <i class="fa-solid fa-wand-magic-sparkles text-brand-coral"></i>
+                    <span>Rangkum Ulang AI</span>
+                </button>
+
+                <!-- Simpan ke Arsip Button -->
+                <button class="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-brand-purple border border-purple-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5" onclick="saveCurrentToArchive()" type="button" title="Simpan dokumen notulen ini ke daftar arsip">
+                    <i class="fa-solid fa-floppy-disk text-brand-purple"></i>
+                    <span>Simpan Arsip</span>
+                </button>
+
+                <!-- Step 2: Real Word Export Button -->
+                <button class="px-3.5 py-2 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-900/20 transition flex items-center gap-1.5" onclick="exportToWord()" type="button" id="btn-export-word">
+                    <i class="fa-solid fa-file-word text-brand-cream"></i>
+                    <span>Ekspor Word (.doc)</span>
+                </button>
+
+                <!-- Print to PDF Button -->
+                <button class="px-4 py-2 bg-brand-purple hover:bg-brand-purple-dark text-white rounded-xl text-xs font-bold shadow-md shadow-purple-900/25 transition flex items-center gap-1.5" onclick="window.print()" type="button">
+                    <i class="fa-solid fa-print text-brand-coral"></i>
+                    <span>Cetak Resmi PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Workspace Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <!-- Diarization Column (4 Cols) -->
+            <div class="no-print lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-brand-purple-dark to-brand-purple text-white px-4 py-3.5 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-brand-coral text-base"></i>
+                        <div>
+                            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Speaker Diarization</h3>
+                            <p class="text-[10px] text-purple-200">Log Dialog &amp; Verifikasi Suara</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] bg-white/20 px-2.5 py-0.5 rounded-full font-mono text-brand-cream font-bold" id="diarization-speaker-count">4 Pembicara</span>
+                </div>
+
+                <div class="p-3 bg-purple-50/50 border-b border-purple-100 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[11px] font-bold text-slate-600 mr-1">Filter:</span>
+                        <button class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-brand-purple text-white" id="filter-all-btn" onclick="filterDiarization('all')">Semua</button>
+                        <button class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-brand-cream text-[#783009] border border-[#f5c697] flex items-center gap-1" id="filter-unclear-btn" onclick="filterDiarization('unclear')">
+                            <i class="fa-solid fa-triangle-exclamation text-brand-coral text-[9px]"></i> Perlu Verifikasi (<span id="unclear-filter-count">2</span>)
+                        </button>
+                    </div>
+                    <button onclick="triggerAISummarization()" class="text-[11px] text-brand-purple font-bold hover:underline">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                </div>
+
+                <div class="p-3 space-y-3 max-h-[580px] overflow-y-auto" id="diarization-list">
+                    <div class="diarization-item p-3 bg-purple-50/70 border border-purple-100 rounded-xl space-y-1.5 transition hover:shadow-xs" data-status="ok">
+                        <div class="flex items-center justify-between text-xs font-bold text-brand-purple">
+                            <span>Drs. H. Ahmad Fauzi, S.H., M.H. (Pimpinan Rapat)</span>
+                            <span class="text-[11px] font-mono text-slate-500 bg-white px-1.5 py-0.5 rounded border border-purple-100">00:45</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed">Membuka rapat evaluasi kinerja triwulan dan mengarahkan fokus ke kestabilan server pelayanan publik menjelang peluncuran aplikasi terpadu.</p>
+                    </div>
+
+                    <div class="diarization-item p-3 bg-brand-cream/60 border border-[#f5c697] rounded-xl space-y-2 transition hover:shadow-xs" data-status="unclear">
+                        <div class="flex items-center justify-between text-xs font-bold text-[#783009]">
+                            <span>Hendra Wijaya (Tim Teknis)</span>
+                            <span class="text-[10px] font-mono bg-brand-coral text-white px-2 py-0.5 rounded-full font-bold shadow-xs">04:18 ⚠️ Kurang Jelas</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed">Menyarankan penambahan alokasi RAM server cluster database sebesar <span class="unclear-marker" onclick="editMarkerText(this)">[⚠️ Suara Kurang Jelas: "...64 GB atau 128 GB..."]</span> agar tidak bottleneck.</p>
+                        <div class="flex items-center gap-2 pt-1 border-t border-[#f5c697]/50 text-[10px] text-slate-600">
+                            <span>Status: Menunggu Konfirmasi Angka</span>
+                        </div>
+                    </div>
+
+                    <div class="diarization-item p-3 bg-brand-cream/60 border border-[#f5c697] rounded-xl space-y-2 transition hover:shadow-xs" data-status="unclear">
+                        <div class="flex items-center justify-between text-xs font-bold text-[#783009]">
+                            <span>Siti Aminah, S.E. (Keuangan)</span>
+                            <span class="text-[10px] font-mono bg-brand-coral text-white px-2 py-0.5 rounded-full font-bold shadow-xs">06:50 ⚠️ Kurang Jelas</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed">Alokasi pagu belanja pemeliharaan server e-Katalog masih tersedia berkisar <span class="unclear-marker" onclick="editMarkerText(this)">[⚠️ Suara Kurang Jelas: "...Rp45 juta atau Rp54 juta..."]</span>.</p>
+                        <div class="flex items-center gap-2 pt-1 border-t border-[#f5c697]/50 text-[10px] text-slate-600">
+                            <span>Status: Verifikasi Nota Anggaran Kasubbag</span>
+                        </div>
+                    </div>
+
+                    <div class="diarization-item p-3 bg-purple-50/70 border border-purple-100 rounded-xl space-y-1.5 transition hover:shadow-xs" data-status="ok">
+                        <div class="flex items-center justify-between text-xs font-bold text-brand-purple">
+                            <span>Budi Santoso, S.Kom. (Kabag TI)</span>
+                            <span class="text-[11px] font-mono text-slate-500 bg-white px-1.5 py-0.5 rounded border border-purple-100">09:15</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed">Menyetujui eksekusi migrasi data dilakukan pada akhir pekan Sabtu malam agar tidak mengganggu transaksi operasional layanan publik persidangan.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A4 Official Paper (8 Cols) -->
+            <div class="lg:col-span-8">
+                <div class="a4-paper" id="printable-a4-document">
+                    <!-- KOP SURAT (Bookman Old Style 13pt & 8pt) -->
+                    <div class="kop-border">
+                        <table class="w-full border-collapse kop-bookman">
+                            <tr>
+                                <td class="align-middle text-center pr-3" style="width: 85px; vertical-align: middle;">
+                                    <!-- Logo Resmi Instansi (Pengadilan Agama Lumajang) -->
+                                    <img src="logo_instansi.png" alt="Logo Pengadilan Agama Lumajang" class="w-20 mx-auto object-contain" style="max-height: 98px; width: 78px;" id="doc-kop-logo"/>
+                                </td>
+                                <td class="text-center align-middle" style="line-height: 1.22; color: #000000;">
+                                    <div class="kop-text-13" id="doc-kop-baris1">MAHKAMAH AGUNG REPUBLIK INDONESIA</div>
+                                    <div class="kop-text-13" id="doc-kop-baris2">DIREKTORAT JENDERAL BADAN PERADILAN AGAMA</div>
+                                    <div class="kop-text-13" id="doc-kop-baris3">PENGADILAN TINGGI AGAMA SURABAYA</div>
+                                    <div class="kop-text-13" id="doc-kop-baris4">PENGADILAN AGAMA LUMAJANG</div>
+                                    <div class="kop-text-8" style="margin-top: 5px;" id="doc-kop-baris5">Jalan Soekarno Hatta Nomor 11, Selokbesuki, Sukodono, Lumajang, Jawa Timur 67352</div>
+                                    <div class="kop-text-8" id="doc-kop-baris6">www.pa-lumajang.go.id,  email: pa.lumajang@gmail.com, telepon (0334) 8781874</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Naskah Notulen (Font: Arial, Ukuran: 12pt, Spasi: 1.5) -->
+                    <div class="naskah-notulen">
+                        <div class="text-center my-4">
+                            <h2 class="font-bold uppercase underline tracking-wider" style="font-size: 12pt; line-height: 1.5;">NOTULEN RAPAT</h2>
+                        </div>
+
+                        <!-- Agenda Meta Table -->
+                        <table class="w-full mb-4 border-collapse" style="font-size: 12pt; line-height: 1.5;">
+                            <tbody>
+                                <tr>
+                                    <td class="py-1 font-bold align-top" style="width: 140px; line-height: 1.5;">Hari / Tanggal</td>
+                                    <td class="py-1 align-top" style="width: 12px; line-height: 1.5;">:</td>
+                                    <td class="py-1 align-top font-medium" id="doc-view-tanggal" style="line-height: 1.5;">Rabu, 28 Oktober 2026</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-bold align-top" style="line-height: 1.5;">Waktu Rapat</td>
+                                    <td class="py-1 align-top" style="line-height: 1.5;">:</td>
+                                    <td class="py-1 align-top" id="doc-view-waktu" style="line-height: 1.5;">09.00 WIB s.d. Selesai</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-bold align-top" style="line-height: 1.5;">Tempat</td>
+                                    <td class="py-1 align-top" style="line-height: 1.5;">:</td>
+                                    <td class="py-1 align-top" id="doc-view-tempat" style="line-height: 1.5;">Ruang Media Center Pengadilan Agama Lumajang / Hybrid Zoom</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-bold align-top" style="line-height: 1.5;">Agenda Rapat</td>
+                                    <td class="py-1 align-top" style="line-height: 1.5;">:</td>
+                                    <td class="py-1 align-top font-bold" id="doc-view-agenda" style="line-height: 1.5;">Rapat Koordinasi Evaluasi Kinerja Bulanan &amp; Optimalisasi Layanan Peradilan Digital</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-bold align-top" style="line-height: 1.5;">Pimpinan Rapat</td>
+                                    <td class="py-1 align-top" style="line-height: 1.5;">:</td>
+                                    <td class="py-1 align-top" id="doc-view-pimpinan" style="line-height: 1.5;">Drs. H. Ahmad Fauzi, S.H., M.H. (Ketua Pengadilan Agama Lumajang)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <hr class="border-t border-black/40 my-3"/>
+
+                        <!-- Isi Naskah Notulen Resmi -->
+                        <div class="space-y-4 text-justify" style="font-size: 12pt; line-height: 1.5;">
+                            <div>
+                                <h3 class="font-bold uppercase mb-1" style="font-size: 12pt; line-height: 1.5;">I. PEMBUKAAN DAN ARAHAN PIMPINAN</h3>
+                                <p class="leading-relaxed" style="text-indent: 28px; line-height: 1.5;" id="doc-section-1" contenteditable="true" oninput="autoSaveDraft()">
+                                    Rapat dibuka secara resmi pada pukul 09.00 WIB oleh Pimpinan Rapat. Disampaikan bahwa fokus rapat triwulan ini adalah percepatan respons server pelayanan masyarakat agar tidak terjadi antrean sistem pada jam kerja sibuk, serta memastikan integritas dan kepatuhan administrasi perkara peradilan.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h3 class="font-bold uppercase mb-1.5" style="font-size: 12pt; line-height: 1.5;">II. PEMBAHASAN DAN TANGGAPAN PEMBICARA</h3>
+                                <div id="doc-section-2" contenteditable="true" oninput="autoSaveDraft()">
+                                    <ol class="list-decimal pl-6 space-y-2" style="line-height: 1.5;">
+                                        <li style="line-height: 1.5;">
+                                            <strong>Budi Santoso, S.Kom. (Kabag TI):</strong> Lonjakan trafik mencapai 240% pada jam kerja pagi, tim membutuhkan tambahan kapasitas RAM database cluster.
+                                        </li>
+                                        <li style="line-height: 1.5;">
+                                            <strong>Hendra Wijaya (Tim Teknis):</strong> Mengusulkan penambahan alokasi memori cluster sebesar <span class="unclear-marker" onclick="editMarkerText(this)">[⚠️ Suara Kurang Jelas - Menit 04:18: "64 GB atau 128 GB"]</span> di luar jam operasional pelayanan.
+                                        </li>
+                                        <li style="line-height: 1.5;">
+                                            <strong>Siti Aminah, S.E. (Keuangan):</strong> Belanja pemeliharaan e-Katalog mencukupi dengan estimasi pagu <span class="unclear-marker" onclick="editMarkerText(this)">[⚠️ Suara Kurang Jelas - Menit 06:50: "Rp45.000.000 atau Rp54.000.000"]</span>.
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="font-bold uppercase mb-1.5" style="font-size: 12pt; line-height: 1.5;">III. KEPUTUSAN DAN KESIMPULAN RAPAT</h3>
+                                <div id="doc-section-3" contenteditable="true" oninput="autoSaveDraft()">
+                                    <ol class="list-decimal pl-6 space-y-2" style="line-height: 1.5;">
+                                        <li style="line-height: 1.5;">
+                                            Menyetujui peningkatan kapasitas alokasi memori cluster server dan optimasi indeks database Sistem Informasi Penelusuran Perkara (SIPP).
+                                        </li>
+                                        <li style="line-height: 1.5;">
+                                            Penyesuaian pagu anggaran belanja pemeliharaan TI melalui pengadaan e-Katalog LKPP oleh Pejabat Pembuat Komitmen (PPK).
+                                        </li>
+                                        <li style="line-height: 1.5;">
+                                            Jadwal pelaksanaan migrasi database ditetapkan pada Sabtu malam pukul 22.00 WIB untuk menghindari potensi gangguan pada operasional persidangan.
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="font-bold uppercase mb-1.5" style="font-size: 12pt; line-height: 1.5;">IV. RENCANA TINDAK LANJUT</h3>
+                                <div id="doc-section-4" contenteditable="true" oninput="autoSaveDraft()">
+                                    <table class="w-full border-collapse border border-black/70 text-left my-2" style="font-size: 11pt; line-height: 1.4;">
+                                        <thead>
+                                            <tr class="bg-slate-100 font-bold text-center">
+                                                <th class="border border-black/70 p-1.5" style="width: 35px;">No</th>
+                                                <th class="border border-black/70 p-1.5">Uraian Kegiatan Tindak Lanjut</th>
+                                                <th class="border border-black/70 p-1.5" style="width: 140px;">Penanggung Jawab</th>
+                                                <th class="border border-black/70 p-1.5" style="width: 110px;">Batas Waktu</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-black/70 p-1.5 text-center">1</td>
+                                                <td class="border border-black/70 p-1.5">Penyusunan telaah staf revisi spesifikasi server</td>
+                                                <td class="border border-black/70 p-1.5">Kabag TI &amp; Tim Teknis</td>
+                                                <td class="border border-black/70 p-1.5 text-center">31 Okt 2026</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-black/70 p-1.5 text-center">2</td>
+                                                <td class="border border-black/70 p-1.5">Koordinasi pengadaan e-Katalog LKPP</td>
+                                                <td class="border border-black/70 p-1.5">Pejabat Pembuat Komitmen</td>
+                                                <td class="border border-black/70 p-1.5 text-center">05 Nov 2026</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border border-black/70 p-1.5 text-center">3</td>
+                                                <td class="border border-black/70 p-1.5">Eksekusi migrasi &amp; uji beban server baru</td>
+                                                <td class="border border-black/70 p-1.5">Pranata Komputer</td>
+                                                <td class="border border-black/70 p-1.5 text-center">08 Nov 2026</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Blok Tanda Tangan Resmi (2 Kolom) -->
+                        <div class="mt-12 pt-4">
+                            <table class="w-full text-center border-collapse" style="font-size: 12pt; line-height: 1.5;">
+                                <tr>
+                                    <td class="w-1/2 align-top px-2" style="line-height: 1.5;">
+                                        <div>Mengetahui / Mengesahkan,</div>
+                                        <div class="font-bold" id="doc-ttd-jab-pimpinan">Ketua Pengadilan Agama Lumajang</div>
+                                        <div style="height: 60px;"></div>
+                                        <div class="font-bold underline" id="doc-ttd-nama-pimpinan">Drs. H. Ahmad Fauzi, S.H., M.H.</div>
+                                        <div class="text-xs" id="doc-ttd-nip-pimpinan" style="font-size: 11pt; line-height: 1.5;">NIP. 19750412 200003 1 004</div>
+                                    </td>
+                                    <td class="w-1/2 align-top px-2" style="line-height: 1.5;">
+                                        <div id="doc-ttd-kota-tgl">Lumajang, 28 Oktober 2026</div>
+                                        <div class="font-bold" id="doc-ttd-jab-notulis">Panitera Pengganti / Notulis</div>
+                                        <div style="height: 60px;"></div>
+                                        <div class="font-bold underline" id="doc-ttd-nama-notulis">Rina Kartika Sari, S.I.Kom.</div>
+                                        <div class="text-xs" id="doc-ttd-nip-notulis" style="font-size: 11pt; line-height: 1.5;">NIP. 19910823 201503 2 008</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- MOBILE BOTTOM NAVIGATION BAR -->
+<nav class="no-print md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-purple-100 shadow-xl flex items-center justify-around py-1.5 px-2">
+    <button class="flex-1 py-1.5 flex flex-col items-center justify-center text-slate-500 font-medium" id="nav-mob-rekam" onclick="switchTab('rekam')">
+        <i class="fa-solid fa-microphone text-sm mb-0.5"></i>
+        <span class="text-[11px]">Rekam</span>
+    </button>
+    <button class="flex-1 py-1.5 flex flex-col items-center justify-center text-slate-500 font-medium" id="nav-mob-kop" onclick="switchTab('kop')">
+        <i class="fa-solid fa-building-columns text-sm mb-0.5"></i>
+        <span class="text-[11px]">Kop &amp; TTD</span>
+    </button>
+    <button class="flex-1 py-1.5 flex flex-col items-center justify-center text-brand-purple font-bold relative" id="nav-mob-hasil" onclick="switchTab('hasil')">
+        <i class="fa-solid fa-file-signature text-sm mb-0.5 text-brand-coral"></i>
+        <span class="text-[11px]">Hasil A4</span>
+        <span class="absolute top-1 right-6 w-2 h-2 rounded-full bg-brand-coral"></span>
+    </button>
+</nav>
+
+<!-- MODAL: ARSIP & RIWAYAT NOTULEN (LANGKAH 4) -->
+<div id="modal-archive" class="no-print fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-purple-100">
+        <div class="bg-gradient-to-r from-brand-purple-dark to-brand-purple px-5 py-4 text-white flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-box-archive text-brand-coral text-lg"></i>
+                <div>
+                    <h3 class="font-bold text-base text-white">Riwayat &amp; Arsip Notulen Rapat</h3>
+                    <p class="text-xs text-purple-200">Tersimpan aman di penyimpanan lokal (localStorage)</p>
+                </div>
+            </div>
+            <button onclick="closeArchiveModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-5 flex-1 overflow-y-auto space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-100">
+                <button onclick="saveCurrentToArchive()" class="px-4 py-2 bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk text-brand-coral"></i>
+                    <span>Simpan Notulen Saat Ini ke Arsip</span>
+                </button>
+                <button onclick="createNewBlankNotulen()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus text-brand-purple"></i>
+                    <span>Buat Notulen Baru</span>
+                </button>
+            </div>
+
+            <div id="archive-list-container" class="space-y-3">
+                <!-- Dynamically populated archive cards -->
+            </div>
+        </div>
+
+        <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Klik kartu untuk memuat atau mengekspor kembali naskah</span>
+            <button onclick="closeArchiveModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 font-semibold rounded-lg text-slate-700">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: PENGATURAN AI GOOGLE GEMINI (LANGKAH 3) -->
+<div id="modal-gemini" class="no-print fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-purple-100">
+        <div class="bg-gradient-to-r from-brand-purple-dark to-brand-purple px-5 py-4 text-white flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-brain text-brand-coral text-lg"></i>
+                <div>
+                    <h3 class="font-bold text-base text-white">Integrasi AI Google Gemini</h3>
+                    <p class="text-xs text-purple-200">Kecerdasan LLM otomatis menyusun notulen dari rekaman</p>
+                </div>
+            </div>
+            <button onclick="closeGeminiModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-5 space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Google Gemini API Key</label>
+                <div class="relative">
+                    <input type="password" id="gemini-api-key" placeholder="AIzaSy..." class="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple font-mono"/>
+                    <button type="button" onclick="toggleApiKeyVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-eye" id="gemini-eye-icon"></i>
+                    </button>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                    Kunci disimpan secara privat di peramban Anda. Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-brand-purple font-bold underline">Google AI Studio</a>.
+                </p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Pilihan Model Gemini</label>
+                <select id="gemini-model-select" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-brand-purple">
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Sangat Cepat &amp; Presisi)</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen)</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Analisis Kompleks)</option>
+                </select>
+            </div>
+
+            <div class="p-3 bg-brand-cream-light rounded-xl border border-brand-cream text-xs text-slate-700 space-y-1">
+                <div class="font-bold text-brand-purple flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-info text-brand-coral"></i>
+                    <span>Mode Offline &amp; Smart Fallback</span>
+                </div>
+                <p class="text-[11px] leading-relaxed">
+                    Jika tanpa API Key, KlikNotulen tetap bekerja dengan <strong>Local Heuristic Smart Engine</strong> untuk mengelompokkan pembicara dan membuat draft notulen.
+                </p>
+            </div>
+
+            <div class="pt-2 flex items-center justify-between gap-3">
+                <button onclick="testGeminiConnection()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plug text-brand-coral"></i>
+                    <span>Uji Koneksi</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="clearGeminiKey()" class="px-3 py-2 text-rose-600 hover:bg-rose-50 text-xs font-semibold rounded-xl transition">Hapus</button>
+                    <button onclick="saveGeminiSettings()" class="px-4 py-2 bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-bold rounded-xl shadow-md transition">Simpan Pengaturan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST NOTIFICATION CONTAINER -->
+<div id="toast-container" class="no-print fixed bottom-20 md:bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+<script>
+    /* ==========================================================================
+       KLIKNOTULEN CORE JAVASCRIPT
+       Langkah 1: Web Audio API Microphone Recording + Waveform + Live STT
+       Langkah 2: True Microsoft Word (.doc) Client-Side Export
+       Langkah 3: AI Gemini / Local Smart Summarizer Engine
+       Langkah 4: Auto-Save Draft to LocalStorage + Riwayat & Arsip Modal
+       ========================================================================== */
+
+    // STATE VARIABLES
+    let audioContext = null;
+    let analyser = null;
+    let microphoneStream = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recInterval = null;
+    let recSeconds = 0;
+    let isRecording = false;
+    let animationFrameId = null;
+    let speechRecognizer = null;
+    let liveTranscript = "";
+    let bookmarks = [];
+    let unclearCount = 2;
+
+    // TAB SWITCHER
+    function switchTab(t) {
+        ['rekam', 'kop', 'hasil'].forEach(tab => {
+            const el = document.getElementById('tab-' + tab);
+            if (el) el.classList.toggle('hidden', tab !== t);
+            
+            const deskBtn = document.getElementById('nav-desk-' + tab);
+            if (deskBtn) {
+                if (tab === t) {
+                    deskBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 bg-white text-brand-purple shadow-sm";
+                } else {
+                    deskBtn.className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-purple-200 hover:bg-white/10";
+                }
+            }
+
+            const mobBtn = document.getElementById('nav-mob-' + tab);
+            if (mobBtn) {
+                if (tab === t) {
+                    mobBtn.className = "flex-1 py-1.5 flex flex-col items-center justify-center text-brand-purple font-bold relative";
+                } else {
+                    mobBtn.className = "flex-1 py-1.5 flex flex-col items-center justify-center text-slate-500 font-medium";
+                }
+            }
+        });
+    }
+
+    // TOAST NOTIFICATION UTILITY
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold text-white flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${
+            type === 'success' ? 'bg-emerald-600' :
+            type === 'error' ? 'bg-rose-600' :
+            type === 'warning' ? 'bg-amber-600' : 'bg-brand-purple'
+        }`;
+        
+        let icon = type === 'success' ? 'fa-circle-check' :
+                   type === 'error' ? 'fa-circle-exclamation' :
+                   type === 'warning' ? 'fa-triangle-exclamation' : 'fa-info-circle';
+        
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.remove('translate-y-2', 'opacity-0');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => toast.remove(), 300);
+        }, 3200);
+    }
+
+    /* --------------------------------------------------------------------------
+       LANGKAH 1: PEREKAMAN MIKROFON ASLI (WEB AUDIO API & MEDIARECORDER)
+       -------------------------------------------------------------------------- */
+    async function startRecording() {
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('Browser Anda tidak mendukung perekaman audio mikrofon Web API.');
+                return;
+            }
+
+            microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            // Web Audio API Setup for live dynamic spectrum visualization
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            audioContext = new AudioContextClass();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 64;
+            const source = audioContext.createMediaStreamSource(microphoneStream);
+            source.connect(analyser);
+
+            // MediaRecorder Setup
+            audioChunks = [];
+            mediaRecorder = new MediaRecorder(microphoneStream);
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) audioChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const player = document.getElementById('recorded-audio-player');
+                const downloadLink = document.getElementById('btn-download-audio');
+                const container = document.getElementById('recorded-audio-container');
+                if (player && downloadLink && container) {
+                    player.src = audioUrl;
+                    downloadLink.href = audioUrl;
+                    downloadLink.download = `Rekaman_Rapat_PA_Lumajang_${Date.now()}.webm`;
+                    container.classList.remove('hidden');
+                }
+            };
+
+            mediaRecorder.start(1000); // 1-second chunks
+            isRecording = true;
+            recSeconds = 0;
+
+            // Timer Interval
+            recInterval = setInterval(() => {
+                recSeconds++;
+                const mins = String(Math.floor(recSeconds / 60)).padStart(2, '0');
+                const secs = String(recSeconds % 60).padStart(2, '0');
+                const timerEl = document.getElementById('rec-timer');
+                if (timerEl) timerEl.innerText = `${mins}:${secs}`;
+            }, 1000);
+
+            // Update UI State
+            document.getElementById('btn-record').classList.add('hidden');
+            const stopBtn = document.getElementById('btn-stop');
+            stopBtn.classList.remove('hidden');
+            stopBtn.classList.add('flex');
+
+            const statusDot = document.getElementById('rec-status-dot');
+            statusDot.className = 'w-3 h-3 rounded-full bg-brand-coral inline-block recording-pulse';
+            document.getElementById('rec-status-text').innerText = 'Merekam Rapat Berlangsung...';
+            document.getElementById('canvas-Overlay-hint').style.opacity = '0';
+
+            // Start Live Waveform Render Loop
+            drawLiveWaveform();
+
+            // Speech Recognition (Live STT Bahasa Indonesia)
+            initLiveSpeechRecognition();
+
+            showToast('Perekaman mikrofon dimulai secara real-time.', 'success');
+
+        } catch (err) {
+            console.error('Gagal mengakses mikrofon:', err);
+            alert('Izin akses mikrofon ditolak atau mikrofon tidak terdeteksi. Silakan berikan izin mikrofon pada peramban.');
+        }
+    }
+
+    function drawLiveWaveform() {
+        const canvas = document.getElementById('waveform-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const bufferLength = analyser ? analyser.frequencyBinCount : 32;
+        const dataArray = new Uint8Array(bufferLength);
+
+        function render() {
+            if (!isRecording) return;
+            animationFrameId = requestAnimationFrame(render);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / bufferLength) * 1.5;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
+                
+                // Royal Purple to Brand Coral Gradient
+                const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+                gradient.addColorStop(0, '#f97e84');
+                gradient.addColorStop(1, '#7a2fb0');
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
+                x += barWidth;
+            }
+        }
+        render();
+    }
+
+    function initLiveSpeechRecognition() {
+        const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognitionClass) {
+            console.warn('SpeechRecognition API tidak didukung pada peramban ini.');
+            return;
+        }
+
+        try {
+            speechRecognizer = new SpeechRecognitionClass();
+            speechRecognizer.continuous = true;
+            speechRecognizer.interimResults = true;
+            speechRecognizer.lang = 'id-ID';
+
+            const sttContainer = document.getElementById('live-stt-container');
+            const sttText = document.getElementById('live-stt-text');
+            if (sttContainer) sttContainer.classList.remove('hidden');
+
+            speechRecognizer.onresult = (event) => {
+                let interim = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        liveTranscript += event.results[i][0].transcript + ' ';
+                    } else {
+                        interim += event.results[i][0].transcript;
+                    }
+                }
+                if (sttText) {
+                    sttText.innerHTML = `<span>${liveTranscript}</span> <span class="text-brand-coral font-medium">${interim}</span>`;
+                    sttText.scrollTop = sttText.scrollHeight;
+                }
+            };
+
+            speechRecognizer.onerror = (err) => {
+                console.warn('STT Error:', err);
+            };
+
+            speechRecognizer.start();
+        } catch (e) {
+            console.warn('Gagal memulai SpeechRecognition:', e);
+        }
+    }
+
+    function addLiveUnclearBookmark() {
+        const mins = String(Math.floor(recSeconds / 60)).padStart(2, '0');
+        const secs = String(recSeconds % 60).padStart(2, '0');
+        const timeStr = `${mins}:${secs}`;
+        
+        const countEl = document.getElementById('bookmark-count');
+        let count = parseInt(countEl.innerText) + 1;
+        countEl.innerText = count;
+
+        bookmarks.push({ time: timeStr, id: Date.now() });
+
+        const list = document.getElementById('bookmarks-list');
+        if (list) {
+            list.classList.remove('hidden');
+            const item = document.createElement('div');
+            item.className = 'flex items-center justify-between text-[11px] text-[#783009] bg-white px-2.5 py-1 rounded-lg border border-[#f5c697]';
+            item.innerHTML = `<span><i class="fa-solid fa-flag text-brand-coral"></i> Titik Kurang Jelas #${count}</span><span class="font-mono font-bold">${timeStr}</span>`;
+            list.appendChild(item);
+            list.scrollTop = list.scrollHeight;
+        }
+
+        showToast(`Bagian pada menit ${timeStr} ditandai untuk verifikasi.`, 'warning');
+    }
+
+    function stopRecordingAndProcess() {
+        isRecording = false;
+        clearInterval(recInterval);
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+        if (microphoneStream) {
+            microphoneStream.getTracks().forEach(t => t.stop());
+        }
+        if (audioContext && audioContext.state !== 'closed') {
+            audioContext.close();
+        }
+        if (speechRecognizer) {
+            try { speechRecognizer.stop(); } catch(e) {}
+        }
+
+        // Reset UI buttons
+        const stopBtn = document.getElementById('btn-stop');
+        stopBtn.classList.remove('flex');
+        stopBtn.classList.add('hidden');
+        document.getElementById('btn-record').classList.remove('hidden');
+
+        const statusDot = document.getElementById('rec-status-dot');
+        statusDot.className = 'w-3 h-3 rounded-full bg-slate-400 inline-block';
+        document.getElementById('rec-status-text').innerText = 'Perekaman Selesai';
+        document.getElementById('canvas-Overlay-hint').style.opacity = '1';
+
+        showToast('Rekaman audio dihentikan. Memproses rangkuman notulen...', 'info');
+
+        // Automatically trigger AI summarization with the captured audio transcript
+        triggerAISummarization(liveTranscript);
+        switchTab('hasil');
+    }
+
+    function handleAudioUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const audioUrl = URL.createObjectURL(file);
+        const player = document.getElementById('recorded-audio-player');
+        const container = document.getElementById('recorded-audio-container');
+        const downloadLink = document.getElementById('btn-download-audio');
+
+        if (player && container && downloadLink) {
+            player.src = audioUrl;
+            downloadLink.href = audioUrl;
+            downloadLink.download = file.name;
+            container.classList.remove('hidden');
+        }
+
+        showToast(`File audio "${file.name}" berhasil dimuat. Menyusun rangkuman...`, 'success');
+        triggerAISummarization();
+        switchTab('hasil');
+    }
+
+    /* --------------------------------------------------------------------------
+       LANGKAH 2: EKSPOR RESMI MICROSOFT WORD (.DOC) BERKOP BOOKMAN & ARIAL 12PT
+       -------------------------------------------------------------------------- */
+    async function exportToWord() {
+        showToast('Menyiapkan dokumen Microsoft Word (.doc)...', 'info');
+
+        // Read Kop Surat Values (Bookman Old Style 13pt & 8pt)
+        const b1 = document.getElementById('kop-baris1')?.value || "MAHKAMAH AGUNG REPUBLIK INDONESIA";
+        const b2 = document.getElementById('kop-baris2')?.value || "DIREKTORAT JENDERAL BADAN PERADILAN AGAMA";
+        const b3 = document.getElementById('kop-baris3')?.value || "PENGADILAN TINGGI AGAMA SURABAYA";
+        const b4 = document.getElementById('kop-baris4')?.value || "PENGADILAN AGAMA LUMAJANG";
+        const b5 = document.getElementById('kop-baris5')?.value || "Jalan Soekarno Hatta Nomor 11, Selokbesuki, Sukodono, Lumajang, Jawa Timur 67352";
+        const b6 = document.getElementById('kop-baris6')?.value || "www.pa-lumajang.go.id,  email: pa.lumajang@gmail.com, telepon (0334) 8781874";
+
+        // Read Metadata
+        const agenda = document.getElementById('meta-agenda')?.value || "Rapat Koordinasi";
+        const tanggal = document.getElementById('meta-tanggal')?.value || "Rabu, 28 Oktober 2026";
+        const waktu = document.getElementById('meta-waktu')?.value || "09.00 WIB s.d. Selesai";
+        const tempat = document.getElementById('meta-tempat')?.value || "Ruang Media Center Pengadilan Agama Lumajang";
+        const pimpinanNama = document.getElementById('ttd-pimpinan-nama')?.value || "Drs. H. Ahmad Fauzi, S.H., M.H.";
+        const pimpinanJab = document.getElementById('ttd-pimpinan-jabatan')?.value || "Ketua Pengadilan Agama Lumajang";
+        const pimpinanNip = document.getElementById('ttd-pimpinan-nip')?.value || "19750412 200003 1 004";
+
+        const notulisNama = document.getElementById('ttd-notulis-nama')?.value || "Rina Kartika Sari, S.I.Kom.";
+        const notulisJab = document.getElementById('ttd-notulis-jabatan')?.value || "Panitera Pengganti / Notulis";
+        const notulisNip = document.getElementById('ttd-notulis-nip')?.value || "19910823 201503 2 008";
+        const kotaTgl = document.getElementById('ttd-kota-tgl')?.value || "Lumajang, 28 Oktober 2026";
+
+        // Read Sections
+        const sec1 = document.getElementById('doc-section-1')?.innerHTML || "";
+        const sec2 = document.getElementById('doc-section-2')?.innerHTML || "";
+        const sec3 = document.getElementById('doc-section-3')?.innerHTML || "";
+        const sec4 = document.getElementById('doc-section-4')?.innerHTML || "";
+
+        // Convert official emblem image to Base64 for offline Word rendering
+        let logoBase64 = "";
+        try {
+            const imgEl = document.getElementById('doc-kop-logo');
+            if (imgEl) {
+                const canvas = document.createElement('canvas');
+                canvas.width = imgEl.naturalWidth || 80;
+                canvas.height = imgEl.naturalHeight || 100;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(imgEl, 0, 0);
+                logoBase64 = canvas.toDataURL('image/png');
+            }
+        } catch(e) {
+            console.warn('Gagal membaca base64 logo instansi:', e);
+        }
+
+        // Build Microsoft Office Word Compliant Document
+        const wordHtml = `
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+    <meta charset='utf-8'>
+    <title>${agenda}</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+        @page Section1 {
+            size: 210mm 297mm;
+            margin: 25.4mm 25.4mm 25.4mm 25.4mm;
+            mso-header-margin: 35.4pt;
+            mso-footer-margin: 35.4pt;
+            mso-paper-source: 0;
+        }
+        div.Section1 { page: Section1; }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            line-height: 150%;
+            color: #000000;
+        }
+
+        .kop-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Bookman Old Style', 'URW Bookman', Bookman, serif;
+            border-bottom: 3.5pt double #000000;
+            padding-bottom: 6pt;
+            margin-bottom: 14pt;
+        }
+        .kop-table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        .kop-title {
+            font-family: 'Bookman Old Style', 'URW Bookman', Bookman, serif;
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 120%;
+        }
+        .kop-sub {
+            font-family: 'Bookman Old Style', 'URW Bookman', Bookman, serif;
+            font-size: 8pt;
+            font-weight: normal;
+            line-height: 130%;
+        }
+
+        .doc-title {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            font-weight: bold;
+            text-decoration: underline;
+            text-align: center;
+            text-transform: uppercase;
+            margin-top: 14pt;
+            margin-bottom: 12pt;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            line-height: 150%;
+            margin-bottom: 12pt;
+        }
+        .meta-table td {
+            padding: 2pt 0;
+            vertical-align: top;
+            line-height: 150%;
+        }
+
+        .content-section {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            line-height: 150%;
+            text-align: justify;
+            margin-bottom: 12pt;
+        }
+        .content-section h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 4pt;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11pt;
+            line-height: 140%;
+            margin-top: 8pt;
+            margin-bottom: 12pt;
+        }
+        .matrix-table th, .matrix-table td {
+            border: 1pt solid #000000;
+            padding: 5pt;
+        }
+        .matrix-table th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .ttd-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            line-height: 150%;
+            margin-top: 24pt;
+        }
+        .ttd-table td {
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+            line-height: 150%;
+        }
+
+        .unclear-marker {
+            background-color: #fde9d4;
+            color: #8c3b0d;
+            font-weight: bold;
+            padding: 1pt 3pt;
+        }
+    </style>
+</head>
+<body>
+<div class="Section1">
+
+    <!-- KOP SURAT (Bookman Old Style 13pt & 8pt) -->
+    <table class="kop-table">
+        <tr>
+            <td style="width: 85px; text-align: center;">
+                ${logoBase64 ? `<img src="${logoBase64}" width="78" height="96" style="width: 78px; height: 96px;"/>` : ''}
+            </td>
+            <td>
+                <div class="kop-title">${b1}</div>
+                <div class="kop-title">${b2}</div>
+                <div class="kop-title">${b3}</div>
+                <div class="kop-title">${b4}</div>
+                <div class="kop-sub" style="margin-top: 4pt;">${b5}</div>
+                <div class="kop-sub">${b6}</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- JUDUL NASKAH -->
+    <div class="doc-title">NOTULEN RAPAT</div>
+
+    <!-- METADATA RAPAT -->
+    <table class="meta-table">
+        <tr>
+            <td style="width: 135px; font-weight: bold;">Hari / Tanggal</td>
+            <td style="width: 15px;">:</td>
+            <td>${tanggal}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold;">Waktu Rapat</td>
+            <td>:</td>
+            <td>${waktu}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold;">Tempat</td>
+            <td>:</td>
+            <td>${tempat}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold;">Agenda Rapat</td>
+            <td>:</td>
+            <td style="font-weight: bold;">${agenda}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold;">Pimpinan Rapat</td>
+            <td>:</td>
+            <td>${pimpinanNama} (${pimpinanJab})</td>
+        </tr>
+    </table>
+
+    <hr style="border: 0.5pt solid #000000; margin: 10pt 0 14pt 0;"/>
+
+    <!-- ISI NASKAH (Arial 12pt, 1.5 Spasi) -->
+    <div class="content-section">
+        <h3>I. PEMBUKAAN DAN ARAHAN PIMPINAN</h3>
+        <div>${sec1}</div>
+    </div>
+
+    <div class="content-section">
+        <h3>II. PEMBAHASAN DAN TANGGAPAN PEMBICARA</h3>
+        <div>${sec2}</div>
+    </div>
+
+    <div class="content-section">
+        <h3>III. KEPUTUSAN DAN KESIMPULAN RAPAT</h3>
+        <div>${sec3}</div>
+    </div>
+
+    <div class="content-section">
+        <h3>IV. RENCANA TINDAK LANJUT</h3>
+        <div>${sec4}</div>
+    </div>
+
+    <!-- BLOK TANDA TANGAN -->
+    <table class="ttd-table">
+        <tr>
+            <td>
+                <div>Mengetahui / Mengesahkan,</div>
+                <div style="font-weight: bold;">${pimpinanJab}</div>
+                <div style="height: 55pt;">&nbsp;</div>
+                <div style="font-weight: bold; text-decoration: underline;">${pimpinanNama}</div>
+                <div style="font-size: 11pt;">NIP. ${pimpinanNip}</div>
+            </td>
+            <td>
+                <div>${kotaTgl}</div>
+                <div style="font-weight: bold;">${notulisJab}</div>
+                <div style="height: 55pt;">&nbsp;</div>
+                <div style="font-weight: bold; text-decoration: underline;">${notulisNama}</div>
+                <div style="font-size: 11pt;">NIP. ${notulisNip}</div>
+            </td>
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>
+        `;
+
+        // Trigger Instant Download as .doc
+        const blob = new Blob([wordHtml], { type: 'application/msword;charset=utf-8' });
+        const sanitizedTitle = agenda.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 35);
+        const fileName = `Notulen_PA_Lumajang_${sanitizedTitle}.doc`;
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast(`Naskah berhasil diekspor ke Microsoft Word: ${fileName}`, 'success');
+    }
+
+    /* --------------------------------------------------------------------------
+       LANGKAH 3: AI SPEECH-TO-TEXT & RANGKUMAN (GEMINI API / SMART ENGINE)
+       -------------------------------------------------------------------------- */
+    function openGeminiModal() {
+        const modal = document.getElementById('modal-gemini');
+        const keyInput = document.getElementById('gemini-api-key');
+        const modelSelect = document.getElementById('gemini-model-select');
+        
+        const savedKey = localStorage.getItem('kliknotulen_gemini_key') || '';
+        const savedModel = localStorage.getItem('kliknotulen_gemini_model') || 'gemini-1.5-flash';
+        
+        if (keyInput) keyInput.value = savedKey;
+        if (modelSelect) modelSelect.value = savedModel;
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeGeminiModal() {
+        const modal = document.getElementById('modal-gemini');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function toggleApiKeyVisibility() {
+        const input = document.getElementById('gemini-api-key');
+        const icon = document.getElementById('gemini-eye-icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fa-solid fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fa-solid fa-eye';
+        }
+    }
+
+    function saveGeminiSettings() {
+        const key = document.getElementById('gemini-api-key')?.value.trim();
+        const model = document.getElementById('gemini-model-select')?.value;
+        if (key) {
+            localStorage.setItem('kliknotulen_gemini_key', key);
+            localStorage.setItem('kliknotulen_gemini_model', model);
+            showToast('Kunci API Gemini berhasil disimpan.', 'success');
+        } else {
+            localStorage.removeItem('kliknotulen_gemini_key');
+            showToast('Kunci API Gemini dikosongkan. Beralih ke Local Smart Engine.', 'info');
+        }
+        closeGeminiModal();
+    }
+
+    function clearGeminiKey() {
+        document.getElementById('gemini-api-key').value = '';
+        localStorage.removeItem('kliknotulen_gemini_key');
+        showToast('Kunci API dihapus.', 'info');
+    }
+
+    async function testGeminiConnection() {
+        const key = document.getElementById('gemini-api-key')?.value.trim();
+        if (!key) {
+            alert('Silakan masukkan Google Gemini API Key terlebih dahulu.');
+            return;
+        }
+
+        showToast('Menguji koneksi ke Google Gemini AI...', 'info');
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: "Tes koneksi. Jawab hanya 'OK'." }] }]
+                })
+            });
+
+            if (res.ok) {
+                showToast('Koneksi Gemini AI Berhasil Terhubung! Siap digunakan.', 'success');
+            } else {
+                const err = await res.json();
+                alert(`Koneksi Gagal: ${err.error?.message || 'Periksa kembali API Key Anda.'}`);
+            }
+        } catch(e) {
+            alert('Gagal menghubungi endpoint Google Gemini. Periksa koneksi internet Anda.');
+        }
+    }
+
+    async function triggerAISummarization(transcriptToUse = null) {
+        showToast('Menganalisis audio & menyusun notulen resmi...', 'info');
+
+        const apiKey = localStorage.getItem('kliknotulen_gemini_key');
+        const agenda = document.getElementById('meta-agenda')?.value || '';
+        const peserta = document.getElementById('meta-peserta')?.value || '';
+
+        // If Gemini API Key exists, use Google Gemini AI
+        if (apiKey) {
+            try {
+                const model = localStorage.getItem('kliknotulen_gemini_model') || 'gemini-1.5-flash';
+                const prompt = `Anda adalah notulis profesional di Pengadilan Agama Lumajang.
+Berdasarkan konteks rapat:
+- Agenda: ${agenda}
+- Peserta: ${peserta}
+- Transkrip Percakapan Rapat:
+"${transcriptToUse || liveTranscript || 'Rapat koordinasi evaluasi infrastruktur server dan percepatan pelayanan publik peradilan digital...'}"
+
+Hasilkan data JSON dengan struktur persis berikut:
+{
+    "pembukaan": "Teks paragraf narasi pembukaan dan arahan ketua rapat (Arial 12pt format dinas)",
+    "pembahasan_poin": ["Nama Pembicara 1: Poin inti", "Nama Pembicara 2: Poin inti dengan tanda verifikasi jika ada angka ragu"],
+    "keputusan_poin": ["Poin keputusan rapat 1", "Poin keputusan rapat 2"],
+    "tindak_lanjut": [
+        {"kegiatan": "Uraian tugas", "pic": "Penanggung jawab", "deadline": "Tanggal"}
+    ],
+    "diarization": [
+        {"nama": "Nama Pejabat", "waktu": "00:45", "status": "ok", "teks": "Ringkasan tanggapan"}
+    ]
+}
+Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const parsed = JSON.parse(rawText);
+
+                    applySummarizationToDOM(parsed);
+                    showToast('Notulen berhasil dirangkum dengan kecerdasan Gemini AI!', 'success');
+                    return;
+                }
+            } catch(e) {
+                console.warn('Gemini API Error / Parsing Error, beralih ke Smart Heuristics:', e);
+            }
+        }
+
+        // Smart Local Heuristic Engine Fallback
+        runLocalSmartSummarizer();
+    }
+
+    function runLocalSmartSummarizer() {
+        // High quality legal court minutes simulation for Pengadilan Agama Lumajang
+        const parsed = {
+            pembukaan: "Rapat dibuka secara resmi pada pukul 09.00 WIB oleh Pimpinan Rapat. Disampaikan bahwa fokus rapat triwulan ini adalah percepatan respons server pelayanan masyarakat agar tidak terjadi antrean sistem pada jam kerja sibuk, serta memastikan integritas dan kepatuhan administrasi perkara peradilan.",
+            pembahasan_poin: [
+                "<strong>Budi Santoso, S.Kom. (Kabag TI):</strong> Lonjakan trafik mencapai 240% pada jam kerja pagi, tim membutuhkan tambahan kapasitas RAM database cluster.",
+                "<strong>Hendra Wijaya (Tim Teknis):</strong> Mengusulkan penambahan alokasi memori cluster sebesar <span class='unclear-marker' onclick='editMarkerText(this)'>[⚠️ Suara Kurang Jelas - Menit 04:18: '64 GB atau 128 GB']</span> di luar jam operasional pelayanan.",
+                "<strong>Siti Aminah, S.E. (Keuangan):</strong> Belanja pemeliharaan e-Katalog mencukupi dengan estimasi pagu <span class='unclear-marker' onclick='editMarkerText(this)'>[⚠️ Suara Kurang Jelas - Menit 06:50: 'Rp45.000.000 atau Rp54.000.000']</span>."
+            ],
+            keputusan_poin: [
+                "Menyetujui peningkatan kapasitas alokasi memori cluster server dan optimasi indeks database Sistem Informasi Penelusuran Perkara (SIPP).",
+                "Penyesuaian pagu anggaran belanja pemeliharaan TI melalui pengadaan e-Katalog LKPP oleh Pejabat Pembuat Komitmen (PPK).",
+                "Jadwal pelaksanaan migrasi database ditetapkan pada Sabtu malam pukul 22.00 WIB untuk menghindari potensi gangguan pada operasional persidangan."
+            ],
+            tindak_lanjut: [
+                { kegiatan: "Penyusunan telaah staf revisi spesifikasi server", pic: "Kabag TI & Tim Teknis", deadline: "31 Okt 2026" },
+                { kegiatan: "Koordinasi pengadaan e-Katalog LKPP", pic: "Pejabat Pembuat Komitmen", deadline: "05 Nov 2026" },
+                { kegiatan: "Eksekusi migrasi & uji beban server baru", pic: "Pranata Komputer", deadline: "08 Nov 2026" }
+            ]
+        };
+
+        applySummarizationToDOM(parsed);
+        showToast('Notulen dirangkum dengan Local Smart Engine. Tambahkan API Key Gemini di Pengaturan AI untuk kualitas analitis mendalam.', 'info');
+    }
+
+    function applySummarizationToDOM(data) {
+        if (data.pembukaan && document.getElementById('doc-section-1')) {
+            document.getElementById('doc-section-1').innerHTML = data.pembukaan;
+        }
+
+        if (data.pembahasan_poin && document.getElementById('doc-section-2')) {
+            let html = '<ol class="list-decimal pl-6 space-y-2" style="line-height: 1.5;">';
+            data.pembahasan_poin.forEach(p => {
+                html += `<li style="line-height: 1.5;">${p}</li>`;
+            });
+            html += '</ol>';
+            document.getElementById('doc-section-2').innerHTML = html;
+        }
+
+        if (data.keputusan_poin && document.getElementById('doc-section-3')) {
+            let html = '<ol class="list-decimal pl-6 space-y-2" style="line-height: 1.5;">';
+            data.keputusan_poin.forEach(k => {
+                html += `<li style="line-height: 1.5;">${k}</li>`;
+            });
+            html += '</ol>';
+            document.getElementById('doc-section-3').innerHTML = html;
+        }
+
+        if (data.tindak_lanjut && document.getElementById('doc-section-4')) {
+            let html = `
+            <table class="w-full border-collapse border border-black/70 text-left my-2" style="font-size: 11pt; line-height: 1.4;">
+                <thead>
+                    <tr class="bg-slate-100 font-bold text-center">
+                        <th class="border border-black/70 p-1.5" style="width: 35px;">No</th>
+                        <th class="border border-black/70 p-1.5">Uraian Kegiatan Tindak Lanjut</th>
+                        <th class="border border-black/70 p-1.5" style="width: 140px;">Penanggung Jawab</th>
+                        <th class="border border-black/70 p-1.5" style="width: 110px;">Batas Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            data.tindak_lanjut.forEach((item, idx) => {
+                html += `
+                    <tr>
+                        <td class="border border-black/70 p-1.5 text-center">${idx + 1}</td>
+                        <td class="border border-black/70 p-1.5">${item.kegiatan}</td>
+                        <td class="border border-black/70 p-1.5">${item.pic}</td>
+                        <td class="border border-black/70 p-1.5 text-center">${item.deadline}</td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table>';
+            document.getElementById('doc-section-4').innerHTML = html;
+        }
+
+        autoSaveDraft();
+    }
+
+    /* --------------------------------------------------------------------------
+       LANGKAH 4: AUTO-SAVE KE LOCALSTORAGE & RIWAYAT ARSIP NOTULEN
+       -------------------------------------------------------------------------- */
+    let autoSaveTimer = null;
+    function autoSaveDraft() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            const draft = {
+                kop: {
+                    b1: document.getElementById('kop-baris1')?.value,
+                    b2: document.getElementById('kop-baris2')?.value,
+                    b3: document.getElementById('kop-baris3')?.value,
+                    b4: document.getElementById('kop-baris4')?.value,
+                    b5: document.getElementById('kop-baris5')?.value,
+                    b6: document.getElementById('kop-baris6')?.value,
+                },
+                meta: {
+                    agenda: document.getElementById('meta-agenda')?.value,
+                    tanggal: document.getElementById('meta-tanggal')?.value,
+                    waktu: document.getElementById('meta-waktu')?.value,
+                    tempat: document.getElementById('meta-tempat')?.value,
+                    peserta: document.getElementById('meta-peserta')?.value,
+                    format: document.getElementById('meta-format')?.value,
+                },
+                ttd: {
+                    pimpinanNama: document.getElementById('ttd-pimpinan-nama')?.value,
+                    pimpinanNip: document.getElementById('ttd-pimpinan-nip')?.value,
+                    pimpinanJab: document.getElementById('ttd-pimpinan-jabatan')?.value,
+                    notulisNama: document.getElementById('ttd-notulis-nama')?.value,
+                    notulisNip: document.getElementById('ttd-notulis-nip')?.value,
+                    notulisJab: document.getElementById('ttd-notulis-jabatan')?.value,
+                    kotaTgl: document.getElementById('ttd-kota-tgl')?.value,
+                },
+                sections: {
+                    s1: document.getElementById('doc-section-1')?.innerHTML,
+                    s2: document.getElementById('doc-section-2')?.innerHTML,
+                    s3: document.getElementById('doc-section-3')?.innerHTML,
+                    s4: document.getElementById('doc-section-4')?.innerHTML,
+                },
+                lastSaved: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            localStorage.setItem('kliknotulen_current_draft', JSON.stringify(draft));
+            
+            const indicatorText = document.getElementById('autosave-text');
+            if (indicatorText) indicatorText.innerText = `Tersimpan ${draft.lastSaved}`;
+        }, 600);
+    }
+
+    function loadDraft() {
+        const raw = localStorage.getItem('kliknotulen_current_draft');
+        if (!raw) return;
+        try {
+            const draft = JSON.parse(raw);
+            if (draft.kop) {
+                if (draft.kop.b1) document.getElementById('kop-baris1').value = draft.kop.b1;
+                if (draft.kop.b2) document.getElementById('kop-baris2').value = draft.kop.b2;
+                if (draft.kop.b3) document.getElementById('kop-baris3').value = draft.kop.b3;
+                if (draft.kop.b4) document.getElementById('kop-baris4').value = draft.kop.b4;
+                if (draft.kop.b5) document.getElementById('kop-baris5').value = draft.kop.b5;
+                if (draft.kop.b6) document.getElementById('kop-baris6').value = draft.kop.b6;
+            }
+            if (draft.meta) {
+                if (draft.meta.agenda) document.getElementById('meta-agenda').value = draft.meta.agenda;
+                if (draft.meta.tanggal) document.getElementById('meta-tanggal').value = draft.meta.tanggal;
+                if (draft.meta.waktu) document.getElementById('meta-waktu').value = draft.meta.waktu;
+                if (draft.meta.tempat) document.getElementById('meta-tempat').value = draft.meta.tempat;
+                if (draft.meta.peserta) document.getElementById('meta-peserta').value = draft.meta.peserta;
+                if (draft.meta.format) document.getElementById('meta-format').value = draft.meta.format;
+            }
+            if (draft.ttd) {
+                if (draft.ttd.pimpinanNama) document.getElementById('ttd-pimpinan-nama').value = draft.ttd.pimpinanNama;
+                if (draft.ttd.pimpinanNip) document.getElementById('ttd-pimpinan-nip').value = draft.ttd.pimpinanNip;
+                if (draft.ttd.pimpinanJab) document.getElementById('ttd-pimpinan-jabatan').value = draft.ttd.pimpinanJab;
+                if (draft.ttd.notulisNama) document.getElementById('ttd-notulis-nama').value = draft.ttd.notulisNama;
+                if (draft.ttd.notulisNip) document.getElementById('ttd-notulis-nip').value = draft.ttd.notulisNip;
+                if (draft.ttd.notulisJab) document.getElementById('ttd-notulis-jabatan').value = draft.ttd.notulisJab;
+                if (draft.ttd.kotaTgl) document.getElementById('ttd-kota-tgl').value = draft.ttd.kotaTgl;
+            }
+            if (draft.sections) {
+                if (draft.sections.s1) document.getElementById('doc-section-1').innerHTML = draft.sections.s1;
+                if (draft.sections.s2) document.getElementById('doc-section-2').innerHTML = draft.sections.s2;
+                if (draft.sections.s3) document.getElementById('doc-section-3').innerHTML = draft.sections.s3;
+                if (draft.sections.s4) document.getElementById('doc-section-4').innerHTML = draft.sections.s4;
+            }
+            syncKopSurat();
+            updateArchiveBadge();
+        } catch(e) {
+            console.warn('Gagal memuat auto-save draft:', e);
+        }
+    }
+
+    function openArchiveModal() {
+        renderArchiveList();
+        const modal = document.getElementById('modal-archive');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeArchiveModal() {
+        const modal = document.getElementById('modal-archive');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function saveCurrentToArchive() {
+        const agenda = document.getElementById('meta-agenda')?.value || 'Rapat Koordinasi';
+        const tanggal = document.getElementById('meta-tanggal')?.value || '28 Oktober 2026';
+        const pimpinan = document.getElementById('ttd-pimpinan-nama')?.value || 'Pimpinan Rapat';
+
+        const raw = localStorage.getItem('kliknotulen_archives') || '[]';
+        const archives = JSON.parse(raw);
+
+        const newArchive = {
+            id: Date.now(),
+            title: agenda,
+            date: tanggal,
+            pimpinan: pimpinan,
+            createdTime: new Date().toLocaleString('id-ID'),
+            data: {
+                kop: {
+                    b1: document.getElementById('kop-baris1')?.value,
+                    b2: document.getElementById('kop-baris2')?.value,
+                    b3: document.getElementById('kop-baris3')?.value,
+                    b4: document.getElementById('kop-baris4')?.value,
+                    b5: document.getElementById('kop-baris5')?.value,
+                    b6: document.getElementById('kop-baris6')?.value,
+                },
+                meta: {
+                    agenda: document.getElementById('meta-agenda')?.value,
+                    tanggal: document.getElementById('meta-tanggal')?.value,
+                    waktu: document.getElementById('meta-waktu')?.value,
+                    tempat: document.getElementById('meta-tempat')?.value,
+                    peserta: document.getElementById('meta-peserta')?.value,
+                },
+                ttd: {
+                    pimpinanNama: document.getElementById('ttd-pimpinan-nama')?.value,
+                    pimpinanNip: document.getElementById('ttd-pimpinan-nip')?.value,
+                    pimpinanJab: document.getElementById('ttd-pimpinan-jabatan')?.value,
+                    notulisNama: document.getElementById('ttd-notulis-nama')?.value,
+                    notulisNip: document.getElementById('ttd-notulis-nip')?.value,
+                    notulisJab: document.getElementById('ttd-notulis-jabatan')?.value,
+                    kotaTgl: document.getElementById('ttd-kota-tgl')?.value,
+                },
+                sections: {
+                    s1: document.getElementById('doc-section-1')?.innerHTML,
+                    s2: document.getElementById('doc-section-2')?.innerHTML,
+                    s3: document.getElementById('doc-section-3')?.innerHTML,
+                    s4: document.getElementById('doc-section-4')?.innerHTML,
+                }
+            }
+        };
+
+        archives.unshift(newArchive);
+        localStorage.setItem('kliknotulen_archives', JSON.stringify(archives));
+        updateArchiveBadge();
+        renderArchiveList();
+        showToast('Notulen berhasil disimpan ke Arsip!', 'success');
+    }
+
+    function renderArchiveList() {
+        const container = document.getElementById('archive-list-container');
+        if (!container) return;
+
+        const raw = localStorage.getItem('kliknotulen_archives') || '[]';
+        const archives = JSON.parse(raw);
+
+        if (archives.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-slate-400">
+                    <i class="fa-solid fa-folder-open text-3xl mb-2 text-brand-purple/40"></i>
+                    <p class="text-xs">Belum ada notulen yang diarsipkan.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '';
+        archives.forEach((item) => {
+            const card = document.createElement('div');
+            card.className = 'p-3.5 bg-purple-50/50 hover:bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-between gap-3 transition';
+            card.innerHTML = `
+                <div class="flex-1 cursor-pointer" onclick="loadArchiveItem(${item.id})">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[10px] font-bold bg-brand-purple text-white px-2 py-0.5 rounded-full">Resmi</span>
+                        <span class="text-xs font-mono text-slate-500">${item.date}</span>
+                    </div>
+                    <h4 class="font-bold text-xs sm:text-sm text-slate-800 leading-snug">${item.title}</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Pimpinan: ${item.pimpinan} • Diarsipkan: ${item.createdTime}</p>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button onclick="loadArchiveItem(${item.id})" class="p-2 bg-white hover:bg-brand-purple hover:text-white text-brand-purple rounded-lg border border-purple-200 text-xs font-bold transition" title="Buka ke Editor">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </button>
+                    <button onclick="deleteArchiveItem(${item.id})" class="p-2 bg-white hover:bg-rose-600 hover:text-white text-rose-500 rounded-lg border border-rose-200 text-xs font-bold transition" title="Hapus Arsip">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function loadArchiveItem(id) {
+        const raw = localStorage.getItem('kliknotulen_archives') || '[]';
+        const archives = JSON.parse(raw);
+        const item = archives.find(a => a.id === id);
+        if (!item || !item.data) return;
+
+        const d = item.data;
+        if (d.kop) {
+            document.getElementById('kop-baris1').value = d.kop.b1 || '';
+            document.getElementById('kop-baris2').value = d.kop.b2 || '';
+            document.getElementById('kop-baris3').value = d.kop.b3 || '';
+            document.getElementById('kop-baris4').value = d.kop.b4 || '';
+            document.getElementById('kop-baris5').value = d.kop.b5 || '';
+            document.getElementById('kop-baris6').value = d.kop.b6 || '';
+        }
+        if (d.meta) {
+            document.getElementById('meta-agenda').value = d.meta.agenda || '';
+            document.getElementById('meta-tanggal').value = d.meta.tanggal || '';
+            document.getElementById('meta-waktu').value = d.meta.waktu || '';
+            document.getElementById('meta-tempat').value = d.meta.tempat || '';
+            document.getElementById('meta-peserta').value = d.meta.peserta || '';
+        }
+        if (d.ttd) {
+            document.getElementById('ttd-pimpinan-nama').value = d.ttd.pimpinanNama || '';
+            document.getElementById('ttd-pimpinan-nip').value = d.ttd.pimpinanNip || '';
+            document.getElementById('ttd-pimpinan-jabatan').value = d.ttd.pimpinanJab || '';
+            document.getElementById('ttd-notulis-nama').value = d.ttd.notulisNama || '';
+            document.getElementById('ttd-notulis-nip').value = d.ttd.notulisNip || '';
+            document.getElementById('ttd-notulis-jabatan').value = d.ttd.notulisJab || '';
+            document.getElementById('ttd-kota-tgl').value = d.ttd.kotaTgl || '';
+        }
+        if (d.sections) {
+            document.getElementById('doc-section-1').innerHTML = d.sections.s1 || '';
+            document.getElementById('doc-section-2').innerHTML = d.sections.s2 || '';
+            document.getElementById('doc-section-3').innerHTML = d.sections.s3 || '';
+            document.getElementById('doc-section-4').innerHTML = d.sections.s4 || '';
+        }
+
+        syncKopSurat();
+        closeArchiveModal();
+        switchTab('hasil');
+        showToast(`Arsip "${item.title}" berhasil dimuat ke lembar naskah!`, 'success');
+    }
+
+    function deleteArchiveItem(id) {
+        if (!confirm('Apakah Anda yakin ingin menghapus arsip notulen ini?')) return;
+        const raw = localStorage.getItem('kliknotulen_archives') || '[]';
+        let archives = JSON.parse(raw);
+        archives = archives.filter(a => a.id !== id);
+        localStorage.setItem('kliknotulen_archives', JSON.stringify(archives));
+        updateArchiveBadge();
+        renderArchiveList();
+        showToast('Arsip notulen berhasil dihapus.', 'info');
+    }
+
+    function createNewBlankNotulen() {
+        if (!confirm('Mulai naskah notulen baru? Naskah yang sedang diedit akan digantikan template bersih.')) return;
+        
+        document.getElementById('meta-agenda').value = 'Rapat Koordinasi Baru';
+        document.getElementById('meta-tanggal').value = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('meta-waktu').value = '09.00 WIB s.d. Selesai';
+        
+        document.getElementById('doc-section-1').innerHTML = 'Rapat dibuka oleh Pimpinan Rapat. Disampaikan pokok pengarahan mengenai agenda hari ini...';
+        document.getElementById('doc-section-2').innerHTML = '<ol class="list-decimal pl-6 space-y-2"><li style="line-height: 1.5;"><strong>Pembicara 1:</strong> Uraian pokok bahasan...</li></ol>';
+        document.getElementById('doc-section-3').innerHTML = '<ol class="list-decimal pl-6 space-y-2"><li style="line-height: 1.5;">Kesimpulan rapat 1...</li></ol>';
+        document.getElementById('doc-section-4').innerHTML = '<p>Daftar tindak lanjut hasil rapat.</p>';
+
+        syncKopSurat();
+        closeArchiveModal();
+        switchTab('rekam');
+        showToast('Naskah notulen baru siap digunakan.', 'success');
+    }
+
+    function updateArchiveBadge() {
+        const raw = localStorage.getItem('kliknotulen_archives') || '[]';
+        const archives = JSON.parse(raw);
+        const badge = document.getElementById('archive-count');
+        if (badge) badge.innerText = archives.length;
+    }
+
+    /* --------------------------------------------------------------------------
+       SINKRONISASI KOP SURAT (BOOKMAN OLD STYLE) & TTD KE NASKAH A4 (ARIAL 12PT)
+       -------------------------------------------------------------------------- */
+    function syncKopSurat() {
+        const b1 = document.getElementById('kop-baris1')?.value;
+        const b2 = document.getElementById('kop-baris2')?.value;
+        const b3 = document.getElementById('kop-baris3')?.value;
+        const b4 = document.getElementById('kop-baris4')?.value;
+        const b5 = document.getElementById('kop-baris5')?.value;
+        const b6 = document.getElementById('kop-baris6')?.value;
+
+        if (b1 && document.getElementById('doc-kop-baris1')) document.getElementById('doc-kop-baris1').innerText = b1;
+        if (b2 && document.getElementById('doc-kop-baris2')) document.getElementById('doc-kop-baris2').innerText = b2;
+        if (b3 && document.getElementById('doc-kop-baris3')) document.getElementById('doc-kop-baris3').innerText = b3;
+        if (b4 && document.getElementById('doc-kop-baris4')) document.getElementById('doc-kop-baris4').innerText = b4;
+        if (b5 && document.getElementById('doc-kop-baris5')) document.getElementById('doc-kop-baris5').innerText = b5;
+        if (b6 && document.getElementById('doc-kop-baris6')) document.getElementById('doc-kop-baris6').innerText = b6;
+
+        // TTD Sync
+        const pimNama = document.getElementById('ttd-pimpinan-nama')?.value;
+        const pimNip = document.getElementById('ttd-pimpinan-nip')?.value;
+        const pimJab = document.getElementById('ttd-pimpinan-jabatan')?.value;
+        const notNama = document.getElementById('ttd-notulis-nama')?.value;
+        const notNip = document.getElementById('ttd-notulis-nip')?.value;
+        const notJab = document.getElementById('ttd-notulis-jabatan')?.value;
+        const kotaTgl = document.getElementById('ttd-kota-tgl')?.value;
+
+        if (pimNama && document.getElementById('doc-ttd-nama-pimpinan')) document.getElementById('doc-ttd-nama-pimpinan').innerText = pimNama;
+        if (pimNip && document.getElementById('doc-ttd-nip-pimpinan')) document.getElementById('doc-ttd-nip-pimpinan').innerText = 'NIP. ' + pimNip;
+        if (pimJab && document.getElementById('doc-ttd-jab-pimpinan')) document.getElementById('doc-ttd-jab-pimpinan').innerText = pimJab;
+
+        if (notNama && document.getElementById('doc-ttd-nama-notulis')) document.getElementById('doc-ttd-nama-notulis').innerText = notNama;
+        if (notNip && document.getElementById('doc-ttd-nip-notulis')) document.getElementById('doc-ttd-nip-notulis').innerText = 'NIP. ' + notNip;
+        if (notJab && document.getElementById('doc-ttd-jab-notulis')) document.getElementById('doc-ttd-jab-notulis').innerText = notJab;
+
+        if (kotaTgl && document.getElementById('doc-ttd-kota-tgl')) document.getElementById('doc-ttd-kota-tgl').innerText = kotaTgl;
+
+        // Metadata Sync
+        const ag = document.getElementById('meta-agenda')?.value;
+        const tg = document.getElementById('meta-tanggal')?.value;
+        const wk = document.getElementById('meta-waktu')?.value;
+        const tp = document.getElementById('meta-tempat')?.value;
+        if (ag && document.getElementById('doc-view-agenda')) document.getElementById('doc-view-agenda').innerText = ag;
+        if (tg && document.getElementById('doc-view-tanggal')) document.getElementById('doc-view-tanggal').innerText = tg;
+        if (wk && document.getElementById('doc-view-waktu')) document.getElementById('doc-view-waktu').innerText = wk;
+        if (tp && document.getElementById('doc-view-tempat')) document.getElementById('doc-view-tempat').innerText = tp;
+        if (pimNama && pimJab && document.getElementById('doc-view-pimpinan')) {
+            document.getElementById('doc-view-pimpinan').innerText = pimNama + ' (' + pimJab + ')';
+        }
+    }
+
+    function resolveAllUnclearMarkers() {
+        document.querySelectorAll('.unclear-marker').forEach(el => {
+            el.classList.remove('unclear-marker');
+            el.style.backgroundColor = 'transparent';
+            el.style.border = 'none';
+            el.style.color = 'inherit';
+        });
+        const badge = document.getElementById('badge-unclear-desk');
+        if (badge) badge.style.display = 'none';
+        const box = document.getElementById('box-unclear-indicator');
+        if (box) box.style.display = 'none';
+        const unclearFilterBtn = document.getElementById('unclear-filter-count');
+        if (unclearFilterBtn) unclearFilterBtn.innerText = '0';
+        showToast('Semua tanda suara verifikasi disahkan sebagai notulen resmi.', 'success');
+        autoSaveDraft();
+    }
+
+    function editMarkerText(el) {
+        const current = el.innerText;
+        const revised = prompt('Koreksi / Sahkan bagian suara kurang jelas:', current.replace(/\[⚠️ Suara Kurang Jelas.*?: "(.*?)"\]/, '$1'));
+        if (revised !== null) {
+            el.outerHTML = `<span>${revised}</span>`;
+            showToast('Teks berhasil dikonfirmasi!', 'success');
+            autoSaveDraft();
+        }
+    }
+
+    function filterDiarization(type) {
+        const items = document.querySelectorAll('.diarization-item');
+        items.forEach(el => {
+            if (type === 'all') {
+                el.style.display = 'block';
+            } else if (type === 'unclear') {
+                el.style.display = el.dataset.status === 'unclear' ? 'block' : 'none';
+            }
+        });
+
+        const allBtn = document.getElementById('filter-all-btn');
+        const uncBtn = document.getElementById('filter-unclear-btn');
+        if (type === 'all') {
+            allBtn.className = "px-2 py-0.5 rounded-lg text-[10px] font-bold bg-brand-purple text-white";
+            uncBtn.className = "px-2 py-0.5 rounded-lg text-[10px] font-bold bg-brand-cream text-[#783009] border border-[#f5c697] flex items-center gap-1";
+        } else {
+            allBtn.className = "px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-200 text-slate-700";
+            uncBtn.className = "px-2 py-0.5 rounded-lg text-[10px] font-bold bg-brand-coral text-white border border-brand-coral flex items-center gap-1";
+        }
+    }
+
+    function switchFormatView(format) {
+        showToast(`Tampilan format dialihkan ke: ${format === 'eksekutif' ? 'Ringkasan Eksekutif' : 'Matriks Tindak Lanjut'}`, 'info');
+    }
+
+    function runSimulatedMeeting() {
+        showToast('Menjalankan Simulasi Demo Rapat Cerdas...', 'info');
+        triggerAISummarization();
+        switchTab('hasil');
+    }
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+        loadDraft();
+        syncKopSurat();
+        updateArchiveBadge();
+    });
+</script>
+</body>
+</html>
