@@ -404,20 +404,47 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Agenda / Acara Rapat</label>
-                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-agenda" type="text" value="Rapat Koordinasi Evaluasi Kinerja Bulanan &amp; Optimalisasi Layanan Peradilan Digital" oninput="syncKopSurat(); autoSaveDraft();"/>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-bold text-slate-700">Agenda / Acara Rapat</label>
+                                <button type="button" onclick="openHistoryPicker('agenda')" class="text-[11px] text-brand-purple hover:text-brand-coral font-bold flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span>Pernah Diketik (<span id="count-hist-agenda">0</span>)</span>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-agenda" type="text" list="list-riwayat-agenda" placeholder="Ketik agenda rapat atau pilih dari riwayat..." value="Rapat Koordinasi Evaluasi Kinerja Bulanan &amp; Optimalisasi Layanan Peradilan Digital" oninput="syncKopSurat(); autoSaveDraft();" onchange="saveHistoryField('agenda')"/>
+                                <datalist id="list-riwayat-agenda"></datalist>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Hari / Tanggal Rapat</label>
-                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-tanggal" type="text" value="Rabu, 28 Oktober 2026" oninput="syncKopSurat(); autoSaveDraft();"/>
+                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-tanggal" type="text" value="Rabu, 28 Oktober 2026" oninput="syncKopSurat(); autoSaveDraft();" onchange="autoSaveDraft()"/>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Waktu Rapat</label>
-                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-waktu" type="text" value="09.00 WIB s.d. Selesai" oninput="syncKopSurat(); autoSaveDraft();"/>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-bold text-slate-700">Waktu Rapat</label>
+                                <button type="button" onclick="openHistoryPicker('waktu')" class="text-[11px] text-brand-purple hover:text-brand-coral font-bold flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span>Riwayat (<span id="count-hist-waktu">0</span>)</span>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-waktu" type="text" list="list-riwayat-waktu" placeholder="Misal: 09.00 WIB s.d. Selesai" value="09.00 WIB s.d. Selesai" oninput="syncKopSurat(); autoSaveDraft();" onchange="saveHistoryField('waktu')"/>
+                                <datalist id="list-riwayat-waktu"></datalist>
+                            </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Tempat / Media Rapat</label>
-                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-tempat" type="text" value="Ruang Media Center Pengadilan Agama Lumajang / Hybrid Zoom" oninput="syncKopSurat(); autoSaveDraft();"/>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-bold text-slate-700">Tempat / Media Rapat</label>
+                                <button type="button" onclick="openHistoryPicker('tempat')" class="text-[11px] text-brand-purple hover:text-brand-coral font-bold flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span>Riwayat (<span id="count-hist-tempat">0</span>)</span>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-tempat" type="text" list="list-riwayat-tempat" placeholder="Misal: Ruang Media Center..." value="Ruang Media Center Pengadilan Agama Lumajang / Hybrid Zoom" oninput="syncKopSurat(); autoSaveDraft();" onchange="saveHistoryField('tempat')"/>
+                                <datalist id="list-riwayat-tempat"></datalist>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Format Notulen</label>
@@ -428,8 +455,17 @@
                             </select>
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Daftar Pembicara / Peserta Hadir</label>
-                            <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-peserta" type="text" value="Drs. H. Ahmad Fauzi, S.H., M.H. (Ketua), Hakim, Panitera, Sekretaris, Pejabat Struktural &amp; Fungsional PA Lumajang" oninput="syncKopSurat(); autoSaveDraft();"/>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-bold text-slate-700">Daftar Pembicara / Peserta Hadir</label>
+                                <button type="button" onclick="openHistoryPicker('peserta')" class="text-[11px] text-brand-purple hover:text-brand-coral font-bold flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span>Pernah Dipakai (<span id="count-hist-peserta">0</span>)</span>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple" id="meta-peserta" type="text" list="list-riwayat-peserta" placeholder="Daftar nama pimpinan, pembicara, pejabat hadir..." value="Drs. H. Ahmad Fauzi, S.H., M.H. (Ketua), Hakim, Panitera, Sekretaris, Pejabat Struktural &amp; Fungsional PA Lumajang" oninput="syncKopSurat(); autoSaveDraft();" onchange="saveHistoryField('peserta')"/>
+                                <datalist id="list-riwayat-peserta"></datalist>
+                            </div>
                         </div>
                     </div>
 
@@ -450,6 +486,29 @@
 
     <!-- TAB 2: PENGATURAN KOP SURAT & TTD -->
     <section class="hidden space-y-5" id="tab-kop">
+        <!-- Banner Status Penyimpanan Permanen -->
+        <div class="p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-purple-50 border border-emerald-200/90 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-emerald-900 shadow-xs">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-emerald-900 text-sm">Pengaturan Kop Surat &amp; Tanda Tangan Tersimpan Permanen</div>
+                    <div class="text-[11px] text-emerald-700">Setiap perubahan otomatis disimpan di peramban (browser) ini sehingga Anda tidak perlu mengetik ulang setiap kali membuka web/login.</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="saveKopTtdProfile(true)" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl transition text-xs flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Simpan Profil Tetap</span>
+                </button>
+                <button type="button" onclick="resetKopTtdToDefault()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl transition text-xs font-semibold flex items-center gap-1" title="Kembalikan ke format baku awal">
+                    <i class="fa-solid fa-rotate-left text-brand-coral"></i>
+                    <span>Reset Standar</span>
+                </button>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
             <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -460,14 +519,24 @@
                     <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">6 Baris Resmi</span>
                 </div>
 
-                <div class="flex items-center gap-3.5 p-3 bg-purple-50/70 border border-purple-200/80 rounded-xl mb-3">
-                    <img src="logo_instansi.png" alt="Logo Pengadilan Agama Lumajang" class="w-12 h-14 object-contain shadow-xs bg-white p-1 rounded-lg border border-purple-100"/>
-                    <div>
+                <!-- Bagian Logo Instansi Interaktif -->
+                <div class="flex items-center gap-3.5 p-3.5 bg-purple-50/70 border border-purple-200/80 rounded-xl mb-3">
+                    <img id="kop-logo-preview" src="logo_instansi.png" alt="Logo Instansi" class="w-12 h-14 object-contain shadow-xs bg-white p-1 rounded-lg border border-purple-200"/>
+                    <div class="flex-1">
                         <div class="text-xs font-bold text-brand-purple flex items-center gap-1.5">
                             <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                            <span>Logo Instansi: logo_instansi.png</span>
+                            <span id="kop-logo-status">Logo Instansi Resmi Aktif</span>
                         </div>
-                        <div class="text-[11px] text-slate-600 mt-0.5">Lambang Resmi Pengadilan Agama Lumajang termuat otomatis</div>
+                        <div class="text-[11px] text-slate-600 mt-0.5">Tersimpan di sistem dokumen dan otomatis tampil pada naskah cetak A4.</div>
+                        <div class="flex items-center gap-2 mt-2">
+                            <input type="file" id="kop-logo-input" accept="image/*" class="hidden" onchange="handleCustomLogoUpload(event)">
+                            <button type="button" onclick="document.getElementById('kop-logo-input').click()" class="text-[11px] px-2.5 py-1 bg-white hover:bg-purple-100 text-brand-purple font-bold rounded-lg border border-purple-200 transition flex items-center gap-1">
+                                <i class="fa-solid fa-upload"></i> Ganti Logo Kustom
+                            </button>
+                            <button type="button" id="btn-reset-logo" onclick="resetCustomLogo()" class="text-[11px] px-2.5 py-1 text-slate-600 hover:text-rose-600 hover:bg-rose-50 font-semibold rounded-lg transition hidden">
+                                <i class="fa-solid fa-rotate-left"></i> Reset ke Logo Asli
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -495,6 +564,25 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Baris 6 (Website, Email &amp; Telepon - Ukuran 8pt)</label>
                         <input class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-purple font-serif" id="kop-baris6" type="text" value="www.pa-lumajang.go.id,  email: pa.lumajang@gmail.com, telepon (0334) 8781874" oninput="syncKopSurat(); autoSaveDraft();"/>
+                    </div>
+                </div>
+
+                <!-- Card Ekspor / Impor Cadangan Pengaturan -->
+                <div class="mt-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-600">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-rotate text-brand-purple"></i>
+                        <span>Pindah ke HP Android / Perangkat Lain?</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="exportProfileJson()" class="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-[11px] font-bold text-slate-700 transition flex items-center gap-1" title="Unduh file cadangan pengaturan Kop, TTD, dan riwayat agenda">
+                            <i class="fa-solid fa-download text-brand-purple"></i>
+                            <span>Ekspor Cadangan (JSON)</span>
+                        </button>
+                        <input type="file" id="import-profile-file" accept=".json" class="hidden" onchange="importProfileJson(event)">
+                        <button type="button" onclick="document.getElementById('import-profile-file').click()" class="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-[11px] font-bold text-slate-700 transition flex items-center gap-1" title="Muat cadangan pengaturan dari file JSON">
+                            <i class="fa-solid fa-upload text-emerald-600"></i>
+                            <span>Impor Cadangan</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -965,6 +1053,31 @@
                     <button onclick="saveGeminiSettings()" class="px-4 py-2 bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-bold rounded-xl shadow-md transition">Simpan Pengaturan</button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: PEMILIH RIWAYAT (AGENDA, WAKTU, TEMPAT, PEMBICARA) -->
+<div id="modal-history-picker" class="no-print fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col overflow-hidden border border-purple-100">
+        <div class="bg-gradient-to-r from-brand-purple-dark to-brand-purple px-5 py-4 text-white flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-clock-rotate-left text-brand-coral text-lg"></i>
+                <div>
+                    <h3 class="font-bold text-base text-white" id="history-modal-title">Pilih Riwayat Tersimpan</h3>
+                    <p class="text-xs text-purple-200">Klik "Gunakan" untuk mengisi kolom formulir secara otomatis</p>
+                </div>
+            </div>
+            <button onclick="closeHistoryModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-4 flex-1 overflow-y-auto space-y-2" id="history-modal-items">
+            <!-- Dynamically populated history cards -->
+        </div>
+        <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Riwayat otomatis diperbarui setiap kali Anda mengetik</span>
+            <button onclick="closeHistoryModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 font-semibold rounded-lg text-slate-700">Tutup</button>
         </div>
     </div>
 </div>
@@ -1808,10 +1921,187 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
     }
 
     /* --------------------------------------------------------------------------
-       LANGKAH 4: AUTO-SAVE KE LOCALSTORAGE & RIWAYAT ARSIP NOTULEN
+       LANGKAH 4: SISTEM PENYIMPANAN PERMANEN & RIWAYAT (LOCALSTORAGE)
        -------------------------------------------------------------------------- */
+    const STORAGE_KEYS = {
+        KOP_TTD: 'kliknotulen_kop_ttd_profile',
+        META_FIELDS: 'kliknotulen_meta_fields',
+        DRAFT: 'kliknotulen_current_draft',
+        ARCHIVES: 'kliknotulen_archives',
+        CUSTOM_LOGO: 'kliknotulen_custom_logo',
+        HIST_AGENDA: 'kliknotulen_hist_agenda',
+        HIST_WAKTU: 'kliknotulen_hist_waktu',
+        HIST_TEMPAT: 'kliknotulen_hist_tempat',
+        HIST_PESERTA: 'kliknotulen_hist_peserta',
+    };
+
+    // PENGELOLAAN RIWAYAT (AUTOCOMPLETE / DATALIST)
+    function getHistoryList(type) {
+        try {
+            const key = 'kliknotulen_hist_' + type;
+            const raw = localStorage.getItem(key);
+            if (!raw) return [];
+            return JSON.parse(raw);
+        } catch(e) {
+            return [];
+        }
+    }
+
+    function addHistoryItem(type, value) {
+        if (!value || typeof value !== 'string') return;
+        const clean = value.trim();
+        if (!clean) return;
+        try {
+            const key = 'kliknotulen_hist_' + type;
+            let list = getHistoryList(type);
+            list = [clean, ...list.filter(item => item.toLowerCase() !== clean.toLowerCase())].slice(0, 30);
+            localStorage.setItem(key, JSON.stringify(list));
+            renderHistoryDatalist(type);
+        } catch(e) {
+            console.warn('Gagal menyimpan riwayat:', e);
+        }
+    }
+
+    function renderHistoryDatalist(type) {
+        const listEl = document.getElementById('list-riwayat-' + type);
+        const countEl = document.getElementById('count-hist-' + type);
+        const items = getHistoryList(type);
+        if (countEl) countEl.innerText = items.length;
+        if (listEl) {
+            listEl.innerHTML = items.map(it => `<option value="${escapeHtml(it)}"></option>`).join('');
+        }
+    }
+
+    function saveHistoryField(type) {
+        const inputId = 'meta-' + type;
+        const val = document.getElementById(inputId)?.value;
+        if (val && val.trim().length > 1) {
+            addHistoryItem(type, val.trim());
+        }
+        autoSaveDraft();
+    }
+
+    function openHistoryPicker(type) {
+        const titles = {
+            agenda: 'Riwayat Agenda Rapat yang Pernah Diketik',
+            waktu: 'Riwayat Waktu Pelaksanaan Rapat',
+            tempat: 'Riwayat Lokasi / Tempat Rapat',
+            peserta: 'Riwayat Daftar Pembicara & Pejabat Hadir'
+        };
+        const targetId = 'meta-' + type;
+        const items = getHistoryList(type);
+        const container = document.getElementById('history-modal-items');
+        const titleEl = document.getElementById('history-modal-title');
+        if (titleEl) titleEl.innerText = titles[type] || 'Riwayat Data Tersimpan';
+
+        if (!items || items.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-slate-400">
+                    <i class="fa-solid fa-clock-rotate-left text-3xl mb-2 text-brand-purple/30"></i>
+                    <p class="text-xs font-semibold">Belum ada riwayat tersimpan untuk bidang ini.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Setiap kali Anda mengetik atau mengubah formulir, sistem akan menyimpannya otomatis.</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = items.map((it, idx) => `
+                <div class="p-3 bg-purple-50/50 hover:bg-purple-100/70 border border-purple-100 rounded-xl flex items-center justify-between gap-3 transition">
+                    <div class="flex-1 cursor-pointer" onclick="selectHistoryItem('${targetId}', ${idx}, '${type}')">
+                        <p class="text-xs text-slate-800 font-semibold leading-relaxed">${escapeHtml(it)}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="selectHistoryItem('${targetId}', ${idx}, '${type}')" class="px-2.5 py-1 bg-brand-purple hover:bg-brand-purple-dark text-white text-[11px] font-bold rounded-lg transition shadow-2xs">
+                            Gunakan
+                        </button>
+                        <button type="button" onclick="deleteHistoryItem('${type}', ${idx})" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="Hapus dari riwayat">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        const modal = document.getElementById('modal-history-picker');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeHistoryModal() {
+        const modal = document.getElementById('modal-history-picker');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function selectHistoryItem(targetId, idx, type) {
+        const items = getHistoryList(type);
+        if (items && items[idx] !== undefined) {
+            const input = document.getElementById(targetId);
+            if (input) {
+                input.value = items[idx];
+                syncKopSurat();
+                autoSaveDraft();
+                showToast(`Data "${items[idx].slice(0, 30)}..." berhasil diterapkan.`, 'success');
+            }
+        }
+        closeHistoryModal();
+    }
+
+    function deleteHistoryItem(type, idx) {
+        let items = getHistoryList(type);
+        items.splice(idx, 1);
+        localStorage.setItem('kliknotulen_hist_' + type, JSON.stringify(items));
+        renderHistoryDatalist(type);
+        openHistoryPicker(type);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // PENYIMPANAN PROFIL KOP & TTD TETAP
+    function saveKopTtdProfile(showNotice = false) {
+        const profile = {
+            b1: document.getElementById('kop-baris1')?.value ?? '',
+            b2: document.getElementById('kop-baris2')?.value ?? '',
+            b3: document.getElementById('kop-baris3')?.value ?? '',
+            b4: document.getElementById('kop-baris4')?.value ?? '',
+            b5: document.getElementById('kop-baris5')?.value ?? '',
+            b6: document.getElementById('kop-baris6')?.value ?? '',
+            pimJab: document.getElementById('ttd-pimpinan-jabatan')?.value ?? '',
+            pimNama: document.getElementById('ttd-pimpinan-nama')?.value ?? '',
+            pimNip: document.getElementById('ttd-pimpinan-nip')?.value ?? '',
+            notJab: document.getElementById('ttd-notulis-jabatan')?.value ?? '',
+            notNama: document.getElementById('ttd-notulis-nama')?.value ?? '',
+            notNip: document.getElementById('ttd-notulis-nip')?.value ?? '',
+            kotaTgl: document.getElementById('ttd-kota-tgl')?.value ?? '',
+            lastUpdated: new Date().toISOString()
+        };
+        localStorage.setItem(STORAGE_KEYS.KOP_TTD, JSON.stringify(profile));
+        if (showNotice) {
+            showToast('Kop Surat & Tanda Tangan berhasil disimpan sebagai profil permanen!', 'success');
+        }
+    }
+
+    function saveMetaFields() {
+        const meta = {
+            agenda: document.getElementById('meta-agenda')?.value ?? '',
+            tanggal: document.getElementById('meta-tanggal')?.value ?? '',
+            waktu: document.getElementById('meta-waktu')?.value ?? '',
+            tempat: document.getElementById('meta-tempat')?.value ?? '',
+            peserta: document.getElementById('meta-peserta')?.value ?? '',
+            format: document.getElementById('meta-format')?.value ?? 'dinas',
+            lastUpdated: new Date().toISOString()
+        };
+        localStorage.setItem(STORAGE_KEYS.META_FIELDS, JSON.stringify(meta));
+    }
+
     let autoSaveTimer = null;
     function autoSaveDraft() {
+        saveKopTtdProfile(false);
+        saveMetaFields();
+
         clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(() => {
             const draft = {
@@ -1849,54 +2139,239 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
                 lastSaved: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
             };
 
-            localStorage.setItem('kliknotulen_current_draft', JSON.stringify(draft));
+            localStorage.setItem(STORAGE_KEYS.DRAFT, JSON.stringify(draft));
             
             const indicatorText = document.getElementById('autosave-text');
             if (indicatorText) indicatorText.innerText = `Tersimpan ${draft.lastSaved}`;
-        }, 600);
+        }, 500);
+    }
+
+    function loadAllSavedData() {
+        // 1. Muat Profil Kop & TTD Tetap
+        const rawKop = localStorage.getItem(STORAGE_KEYS.KOP_TTD);
+        if (rawKop) {
+            try {
+                const p = JSON.parse(rawKop);
+                if (p.b1 !== undefined) document.getElementById('kop-baris1').value = p.b1;
+                if (p.b2 !== undefined) document.getElementById('kop-baris2').value = p.b2;
+                if (p.b3 !== undefined) document.getElementById('kop-baris3').value = p.b3;
+                if (p.b4 !== undefined) document.getElementById('kop-baris4').value = p.b4;
+                if (p.b5 !== undefined) document.getElementById('kop-baris5').value = p.b5;
+                if (p.b6 !== undefined) document.getElementById('kop-baris6').value = p.b6;
+
+                if (p.pimJab !== undefined) document.getElementById('ttd-pimpinan-jabatan').value = p.pimJab;
+                if (p.pimNama !== undefined) document.getElementById('ttd-pimpinan-nama').value = p.pimNama;
+                if (p.pimNip !== undefined) document.getElementById('ttd-pimpinan-nip').value = p.pimNip;
+                if (p.notJab !== undefined) document.getElementById('ttd-notulis-jabatan').value = p.notJab;
+                if (p.notNama !== undefined) document.getElementById('ttd-notulis-nama').value = p.notNama;
+                if (p.notNip !== undefined) document.getElementById('ttd-notulis-nip').value = p.notNip;
+                if (p.kotaTgl !== undefined) document.getElementById('ttd-kota-tgl').value = p.kotaTgl;
+            } catch(e) {
+                console.warn('Gagal memuat profil Kop & TTD:', e);
+            }
+        }
+
+        // 2. Muat Logo Kustom jika ada
+        const savedLogo = localStorage.getItem(STORAGE_KEYS.CUSTOM_LOGO);
+        if (savedLogo) {
+            applyCustomLogoToDom(savedLogo);
+        }
+
+        // 3. Muat Bidang Meta Terakhir (Agenda, Waktu, Tempat, Peserta)
+        const rawMeta = localStorage.getItem(STORAGE_KEYS.META_FIELDS);
+        if (rawMeta) {
+            try {
+                const m = JSON.parse(rawMeta);
+                if (m.agenda !== undefined && m.agenda !== '') document.getElementById('meta-agenda').value = m.agenda;
+                if (m.tanggal !== undefined && m.tanggal !== '') document.getElementById('meta-tanggal').value = m.tanggal;
+                if (m.waktu !== undefined && m.waktu !== '') document.getElementById('meta-waktu').value = m.waktu;
+                if (m.tempat !== undefined && m.tempat !== '') document.getElementById('meta-tempat').value = m.tempat;
+                if (m.peserta !== undefined && m.peserta !== '') document.getElementById('meta-peserta').value = m.peserta;
+                if (m.format !== undefined && m.format !== '') document.getElementById('meta-format').value = m.format;
+            } catch(e) {
+                console.warn('Gagal memuat meta fields:', e);
+            }
+        }
+
+        // 4. Muat Draf Naskah Berjalan jika ada
+        const rawDraft = localStorage.getItem(STORAGE_KEYS.DRAFT);
+        if (rawDraft) {
+            try {
+                const draft = JSON.parse(rawDraft);
+                if (draft.sections) {
+                    if (draft.sections.s1) document.getElementById('doc-section-1').innerHTML = draft.sections.s1;
+                    if (draft.sections.s2) document.getElementById('doc-section-2').innerHTML = draft.sections.s2;
+                    if (draft.sections.s3) document.getElementById('doc-section-3').innerHTML = draft.sections.s3;
+                    if (draft.sections.s4) document.getElementById('doc-section-4').innerHTML = draft.sections.s4;
+                }
+            } catch(e) {
+                console.warn('Gagal memuat draft sections:', e);
+            }
+        }
+
+        // 5. Inisialisasi Data Riwayat Datalist
+        seedInitialHistoryIfEmpty();
+        ['agenda', 'waktu', 'tempat', 'peserta'].forEach(type => {
+            renderHistoryDatalist(type);
+        });
+
+        // 6. Sinkronisasi Kop & TTD ke Naskah Cetak
+        syncKopSurat();
+        updateArchiveBadge();
+    }
+
+    function seedInitialHistoryIfEmpty() {
+        if (getHistoryList('agenda').length === 0) {
+            const currentAg = document.getElementById('meta-agenda')?.value;
+            if (currentAg) addHistoryItem('agenda', currentAg);
+            addHistoryItem('agenda', 'Rapat Koordinasi Evaluasi Kinerja Bulanan & Optimalisasi Layanan Peradilan Digital');
+            addHistoryItem('agenda', 'Rapat Evaluasi Kinerja Triwulan & Pelayanan Terpadu Satu Pintu (PTSP)');
+            addHistoryItem('agenda', 'Rapat Koordinasi Kepaniteraan, Mediasi & Administrasi Perkara');
+            addHistoryItem('agenda', 'Rapat Kesekretariatan, Tata Kelola IT & Realisasi DIPA 01/04');
+        }
+        if (getHistoryList('waktu').length === 0) {
+            const currentWk = document.getElementById('meta-waktu')?.value;
+            if (currentWk) addHistoryItem('waktu', currentWk);
+            addHistoryItem('waktu', '09.00 WIB s.d. Selesai');
+            addHistoryItem('waktu', '08.30 WIB s.d. 11.30 WIB');
+            addHistoryItem('waktu', '13.30 WIB s.d. 15.30 WIB');
+        }
+        if (getHistoryList('tempat').length === 0) {
+            const currentTp = document.getElementById('meta-tempat')?.value;
+            if (currentTp) addHistoryItem('tempat', currentTp);
+            addHistoryItem('tempat', 'Ruang Media Center Pengadilan Agama Lumajang / Hybrid Zoom');
+            addHistoryItem('tempat', 'Ruang Sidang Utama PA Lumajang');
+            addHistoryItem('tempat', 'Ruang Rapat Pimpinan');
+        }
+        if (getHistoryList('peserta').length === 0) {
+            const currentPs = document.getElementById('meta-peserta')?.value;
+            if (currentPs) addHistoryItem('peserta', currentPs);
+            addHistoryItem('peserta', 'Drs. H. Ahmad Fauzi, S.H., M.H. (Ketua), Hakim, Panitera, Sekretaris, Pejabat Struktural & Fungsional PA Lumajang');
+            addHistoryItem('peserta', 'Ketua, Wakil Ketua, Seluruh Hakim, Panitera, dan Sekretaris');
+            addHistoryItem('peserta', 'Tim Satgas TI, Pranata Komputer, dan Pengelola Website');
+        }
+    }
+
+    // LOGO KUSTOM MANAGEMENT
+    function handleCustomLogoUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            alert('Silakan pilih berkas gambar (PNG, JPG, atau JPEG).');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            localStorage.setItem(STORAGE_KEYS.CUSTOM_LOGO, base64);
+            applyCustomLogoToDom(base64);
+            showToast('Logo instansi berhasil disimpan permanen!', 'success');
+        };
+        reader.readAsDataURL(file);
+        event.target.value = '';
+    }
+
+    function applyCustomLogoToDom(src) {
+        const docLogo = document.getElementById('doc-kop-logo');
+        const prevLogo = document.getElementById('kop-logo-preview');
+        if (docLogo) docLogo.src = src;
+        if (prevLogo) prevLogo.src = src;
+        const btnReset = document.getElementById('btn-reset-logo');
+        if (btnReset) btnReset.classList.remove('hidden');
+        const status = document.getElementById('kop-logo-status');
+        if (status) status.innerText = 'Logo Kustom Aktif & Tersimpan';
+    }
+
+    function resetCustomLogo() {
+        if (!confirm('Kembalikan logo ke logo resmi bawaan (logo_instansi.png)?')) return;
+        localStorage.removeItem(STORAGE_KEYS.CUSTOM_LOGO);
+        const docLogo = document.getElementById('doc-kop-logo');
+        const prevLogo = document.getElementById('kop-logo-preview');
+        if (docLogo) docLogo.src = 'logo_instansi.png';
+        if (prevLogo) prevLogo.src = 'logo_instansi.png';
+        const btnReset = document.getElementById('btn-reset-logo');
+        if (btnReset) btnReset.classList.add('hidden');
+        const status = document.getElementById('kop-logo-status');
+        if (status) status.innerText = 'Logo Instansi Resmi Aktif';
+        showToast('Logo dikembalikan ke format awal.', 'info');
+    }
+
+    function resetKopTtdToDefault() {
+        if (!confirm('Kembalikan susunan Kop Surat dan Tanda Tangan ke format standar Pengadilan Agama Lumajang?')) return;
+        document.getElementById('kop-baris1').value = 'MAHKAMAH AGUNG REPUBLIK INDONESIA';
+        document.getElementById('kop-baris2').value = 'DIREKTORAT JENDERAL BADAN PERADILAN AGAMA';
+        document.getElementById('kop-baris3').value = 'PENGADILAN TINGGI AGAMA SURABAYA';
+        document.getElementById('kop-baris4').value = 'PENGADILAN AGAMA LUMAJANG';
+        document.getElementById('kop-baris5').value = 'Jalan Soekarno Hatta Nomor 11, Selokbesuki, Sukodono, Lumajang, Jawa Timur 67352';
+        document.getElementById('kop-baris6').value = 'www.pa-lumajang.go.id,  email: pa.lumajang@gmail.com, telepon (0334) 8781874';
+
+        document.getElementById('ttd-pimpinan-jabatan').value = 'Ketua Pengadilan Agama Lumajang';
+        document.getElementById('ttd-pimpinan-nama').value = 'Drs. H. Ahmad Fauzi, S.H., M.H.';
+        document.getElementById('ttd-pimpinan-nip').value = '19750412 200003 1 004';
+        document.getElementById('ttd-notulis-jabatan').value = 'Panitera Pengganti / Notulis';
+        document.getElementById('ttd-notulis-nama').value = 'Rina Kartika Sari, S.I.Kom.';
+        document.getElementById('ttd-notulis-nip').value = '19910823 201503 2 008';
+        document.getElementById('ttd-kota-tgl').value = 'Lumajang, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+        saveKopTtdProfile(false);
+        syncKopSurat();
+        showToast('Format Kop Surat & Tanda Tangan dikembalikan ke standar.', 'info');
+    }
+
+    // CADANGAN DAN PEMULIHAN (BACKUP / RESTORE JSON)
+    function exportProfileJson() {
+        const data = {
+            appName: 'KlikNotulen',
+            version: '2.0',
+            exportedAt: new Date().toISOString(),
+            kop_ttd: JSON.parse(localStorage.getItem(STORAGE_KEYS.KOP_TTD) || '{}'),
+            meta: JSON.parse(localStorage.getItem(STORAGE_KEYS.META_FIELDS) || '{}'),
+            customLogo: localStorage.getItem(STORAGE_KEYS.CUSTOM_LOGO) || '',
+            history: {
+                agenda: getHistoryList('agenda'),
+                waktu: getHistoryList('waktu'),
+                tempat: getHistoryList('tempat'),
+                peserta: getHistoryList('peserta')
+            }
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cadangan_kliknotulen_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Cadangan profil & riwayat berhasil diunduh!', 'success');
+    }
+
+    function importProfileJson(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.kop_ttd) localStorage.setItem(STORAGE_KEYS.KOP_TTD, JSON.stringify(data.kop_ttd));
+                if (data.meta) localStorage.setItem(STORAGE_KEYS.META_FIELDS, JSON.stringify(data.meta));
+                if (data.customLogo) localStorage.setItem(STORAGE_KEYS.CUSTOM_LOGO, data.customLogo);
+                if (data.history) {
+                    if (data.history.agenda) localStorage.setItem(STORAGE_KEYS.HIST_AGENDA, JSON.stringify(data.history.agenda));
+                    if (data.history.waktu) localStorage.setItem(STORAGE_KEYS.HIST_WAKTU, JSON.stringify(data.history.waktu));
+                    if (data.history.tempat) localStorage.setItem(STORAGE_KEYS.HIST_TEMPAT, JSON.stringify(data.history.tempat));
+                    if (data.history.peserta) localStorage.setItem(STORAGE_KEYS.HIST_PESERTA, JSON.stringify(data.history.peserta));
+                }
+                loadAllSavedData();
+                showToast('Cadangan profil dan riwayat berhasil dipulihkan!', 'success');
+            } catch(err) {
+                alert('Gagal membaca file cadangan: format JSON tidak valid.');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
     }
 
     function loadDraft() {
-        const raw = localStorage.getItem('kliknotulen_current_draft');
-        if (!raw) return;
-        try {
-            const draft = JSON.parse(raw);
-            if (draft.kop) {
-                if (draft.kop.b1) document.getElementById('kop-baris1').value = draft.kop.b1;
-                if (draft.kop.b2) document.getElementById('kop-baris2').value = draft.kop.b2;
-                if (draft.kop.b3) document.getElementById('kop-baris3').value = draft.kop.b3;
-                if (draft.kop.b4) document.getElementById('kop-baris4').value = draft.kop.b4;
-                if (draft.kop.b5) document.getElementById('kop-baris5').value = draft.kop.b5;
-                if (draft.kop.b6) document.getElementById('kop-baris6').value = draft.kop.b6;
-            }
-            if (draft.meta) {
-                if (draft.meta.agenda) document.getElementById('meta-agenda').value = draft.meta.agenda;
-                if (draft.meta.tanggal) document.getElementById('meta-tanggal').value = draft.meta.tanggal;
-                if (draft.meta.waktu) document.getElementById('meta-waktu').value = draft.meta.waktu;
-                if (draft.meta.tempat) document.getElementById('meta-tempat').value = draft.meta.tempat;
-                if (draft.meta.peserta) document.getElementById('meta-peserta').value = draft.meta.peserta;
-                if (draft.meta.format) document.getElementById('meta-format').value = draft.meta.format;
-            }
-            if (draft.ttd) {
-                if (draft.ttd.pimpinanNama) document.getElementById('ttd-pimpinan-nama').value = draft.ttd.pimpinanNama;
-                if (draft.ttd.pimpinanNip) document.getElementById('ttd-pimpinan-nip').value = draft.ttd.pimpinanNip;
-                if (draft.ttd.pimpinanJab) document.getElementById('ttd-pimpinan-jabatan').value = draft.ttd.pimpinanJab;
-                if (draft.ttd.notulisNama) document.getElementById('ttd-notulis-nama').value = draft.ttd.notulisNama;
-                if (draft.ttd.notulisNip) document.getElementById('ttd-notulis-nip').value = draft.ttd.notulisNip;
-                if (draft.ttd.notulisJab) document.getElementById('ttd-notulis-jabatan').value = draft.ttd.notulisJab;
-                if (draft.ttd.kotaTgl) document.getElementById('ttd-kota-tgl').value = draft.ttd.kotaTgl;
-            }
-            if (draft.sections) {
-                if (draft.sections.s1) document.getElementById('doc-section-1').innerHTML = draft.sections.s1;
-                if (draft.sections.s2) document.getElementById('doc-section-2').innerHTML = draft.sections.s2;
-                if (draft.sections.s3) document.getElementById('doc-section-3').innerHTML = draft.sections.s3;
-                if (draft.sections.s4) document.getElementById('doc-section-4').innerHTML = draft.sections.s4;
-            }
-            syncKopSurat();
-            updateArchiveBadge();
-        } catch(e) {
-            console.warn('Gagal memuat auto-save draft:', e);
-        }
+        loadAllSavedData();
     }
 
     function openArchiveModal() {
@@ -1960,6 +2435,16 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
 
         archives.unshift(newArchive);
         localStorage.setItem('kliknotulen_archives', JSON.stringify(archives));
+        
+        // Simpan juga otomatis ke riwayat formulir
+        addHistoryItem('agenda', agenda);
+        const curWk = document.getElementById('meta-waktu')?.value;
+        const curTp = document.getElementById('meta-tempat')?.value;
+        const curPs = document.getElementById('meta-peserta')?.value;
+        if (curWk) addHistoryItem('waktu', curWk);
+        if (curTp) addHistoryItem('tempat', curTp);
+        if (curPs) addHistoryItem('peserta', curPs);
+
         updateArchiveBadge();
         renderArchiveList();
         showToast('Notulen berhasil disimpan ke Arsip!', 'success');
@@ -2047,6 +2532,7 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
         }
 
         syncKopSurat();
+        autoSaveDraft();
         closeArchiveModal();
         switchTab('hasil');
         showToast(`Arsip "${item.title}" berhasil dimuat ke lembar naskah!`, 'success');
@@ -2064,21 +2550,24 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
     }
 
     function createNewBlankNotulen() {
-        if (!confirm('Mulai naskah notulen baru? Naskah yang sedang diedit akan digantikan template bersih.')) return;
+        if (!confirm('Mulai naskah notulen baru? Lembar naskah akan disiapkan bersih, sedangkan Kop Surat dan Data Pejabat Anda tetap tersimpan utuh.')) return;
         
-        document.getElementById('meta-agenda').value = 'Rapat Koordinasi Baru';
+        const prevAg = document.getElementById('meta-agenda')?.value;
+        if (prevAg) addHistoryItem('agenda', prevAg);
+
+        document.getElementById('meta-agenda').value = '';
         document.getElementById('meta-tanggal').value = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        document.getElementById('meta-waktu').value = '09.00 WIB s.d. Selesai';
         
-        document.getElementById('doc-section-1').innerHTML = 'Rapat dibuka oleh Pimpinan Rapat. Disampaikan pokok pengarahan mengenai agenda hari ini...';
-        document.getElementById('doc-section-2').innerHTML = '<ol class="list-decimal pl-6 space-y-2"><li style="line-height: 1.5;"><strong>Pembicara 1:</strong> Uraian pokok bahasan...</li></ol>';
-        document.getElementById('doc-section-3').innerHTML = '<ol class="list-decimal pl-6 space-y-2"><li style="line-height: 1.5;">Kesimpulan rapat 1...</li></ol>';
-        document.getElementById('doc-section-4').innerHTML = '<p>Daftar tindak lanjut hasil rapat.</p>';
+        document.getElementById('doc-section-1').innerHTML = '<p class="leading-relaxed" style="text-indent: 28px; line-height: 1.5;">Rapat dibuka oleh Pimpinan Rapat. Disampaikan pokok pengarahan mengenai agenda hari ini...</p>';
+        document.getElementById('doc-section-2').innerHTML = '<ol class="list-decimal pl-6 space-y-2"><li style="line-height: 1.5;"><strong>Pembicara 1:</strong> Uraian pokok bahasan rapat dinas...</li></ol>';
+        document.getElementById('doc-section-3').innerHTML = '<ol class="list-decimal pl-6 space-y-2"><li style="line-height: 1.5;">Kesimpulan rapat dinas...</li></ol>';
+        document.getElementById('doc-section-4').innerHTML = '<p>Daftar tindak lanjut hasil rapat dinas.</p>';
 
         syncKopSurat();
+        autoSaveDraft();
         closeArchiveModal();
         switchTab('rekam');
-        showToast('Naskah notulen baru siap digunakan.', 'success');
+        showToast('Naskah notulen baru siap digunakan (Kop & TTD tetap tersimpan).', 'success');
     }
 
     function updateArchiveBadge() {
@@ -2197,11 +2686,14 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
         switchTab('hasil');
     }
 
-    // INITIALIZATION
+    // INITIALIZATION & PERSISTENCE HOOKS
+    window.addEventListener('beforeunload', () => {
+        saveKopTtdProfile(false);
+        saveMetaFields();
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
-        loadDraft();
-        syncKopSurat();
-        updateArchiveBadge();
+        loadAllSavedData();
     });
 </script>
 </body>
