@@ -37,9 +37,21 @@
         content="Aplikasi Notulen Rapat Pintar &amp; Format Dinas Resmi Berstandar A4. Perekaman Suara Real-Time, Live Transkripsi Indonesia, dan AI Gemini." />
     <meta name="twitter:image" content="https://kliknotulen.vercel.app/og_preview.jpg" />
 
-    <!-- Favicon & Apple Icon -->
-    <link rel="icon" type="image/jpeg" href="logo_aplikasi.jpg" />
-    <link rel="apple-touch-icon" href="og_preview.jpg" />
+    <!-- PWA Web App Manifest & Android / iOS Home Screen Icons -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="KlikNotulen" />
+    <meta name="application-name" content="KlikNotulen" />
+    <meta name="theme-color" content="#5e218a" />
+    <meta name="msapplication-TileColor" content="#120926" />
+
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="shortcut icon" href="icon-192.png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
     <link
@@ -3108,6 +3120,13 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
                 openGeminiModal();
             } else if (tabParam === 'arsip') {
                 openArchiveModal();
+            }
+
+            // Register Service Worker for PWA & Android WebAPK Full-bleed Icon
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch((err) => {
+                    console.warn('SW register error:', err);
+                });
             }
         });
     </script>

@@ -1,0 +1,42 @@
+{
+  "name": "KlikNotulen - Konversi Lisan Instan ke Kertas Notulen",
+  "short_name": "KlikNotulen",
+  "description": "Aplikasi Notulen Rapat Pintar & Format Dinas Resmi Berstandar A4. Perekaman Suara Real-Time, Live Transkripsi Indonesia, dan AI Gemini.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#120926",
+  "theme_color": "#5e218a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "productivity",
+    "business",
+    "utilities"
+  ]
+}

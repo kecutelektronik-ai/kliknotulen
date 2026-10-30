@@ -226,12 +226,13 @@ KlikNotulen didesain sepenuhnya ramah perangkat seluler (*Mobile-Friendly*), seh
 ### 8.1 Rekomendasi Peramban di Android
 Sangat direkomendasikan menggunakan **Google Chrome Android** karena peramban ini memiliki integrasi bawaan terbaik dengan mesin suara Google Speech-to-Text bahasa Indonesia.
 
-### 8.2 Memasang Aplikasi ke Layar Utama (Add to Home Screen)
-Agar KlikNotulen berjalan layar penuh (*Full-Screen App*) tanpa bilah alamat browser:
-1. Buka `https://kliknotulen.vercel.app/` di Google Chrome HP.
-2. Ketuk ikon titik tiga (⋮) di pojok kanan atas browser.
-3. Pilih menu **"Tambahkan ke Layar Utama" (Add to Home Screen)** atau **"Instal Aplikasi"**.
-4. Ikon resmi KlikNotulen akan muncul di menu aplikasi ponsel Anda layaknya aplikasi Play Store.
+### 8.2 Memasang Aplikasi ke Layar Utama (PWA WebAPK / Full-Bleed Icon)
+Aplikasi kini sudah dilengkapi **Web App Manifest & Maskable Icon** resmi berstandar Android Adaptive Icon:
+1. Hapus pintasan (*shortcut*) lama yang ada di layar utama HP Anda (jika sebelumnya dibuat sebelum pembaruan).
+2. Buka `https://kliknotulen.vercel.app/` di Google Chrome HP Android Anda.
+3. Ketuk ikon titik tiga (⋮) di pojok kanan atas browser.
+4. Pilih menu **"Tambahkan ke Layar Utama" (Add to Home Screen)** atau **"Instal Aplikasi" (Install App)**.
+5. Logo resmi KlikNotulen akan otomatis terpasang memenuhi ikon layar utama (*full-bleed*) dengan warna ungu dinas elegan tanpa ada bingkai putih dan berjalan dalam mode layar penuh (*standalone app*).
 
 ### 8.3 Navigasi Bilah Bawah (Mobile Bottom Bar)
 Pada tampilan layar HP, menu utama berpindah ke bagian bawah layar untuk memudahkan jangkauan jempol:
@@ -255,3 +256,4 @@ Pada tampilan layar HP, menu utama berpindah ke bagian bawah layar untuk memudah
 
 *Hak Cipta © 2026 KlikNotulen Team. Dilindungi Undang-Undang.*  
 *Dirancang untuk Efisiensi Birokrasi dan Ketertiban Tata Kelola Rapat Dinas.*
+
