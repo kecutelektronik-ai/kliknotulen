@@ -2724,6 +2724,15 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
 
     window.addEventListener('DOMContentLoaded', () => {
         loadAllSavedData();
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab') || window.location.hash.replace('#', '');
+        if (['rekam', 'kop', 'hasil'].includes(tabParam)) {
+            switchTab(tabParam);
+        } else if (tabParam === 'gemini') {
+            openGeminiModal();
+        } else if (tabParam === 'arsip') {
+            openArchiveModal();
+        }
     });
 </script>
 </body>
