@@ -283,10 +283,12 @@
                 <span class="hidden sm:inline">Arsip</span> (<span id="archive-count">0</span>)
             </button>
 
-            <!-- Gemini AI Settings Modal Trigger -->
-            <button class="text-xs bg-white/10 hover:bg-white/20 text-white font-semibold px-3 py-2 rounded-xl border border-white/20 transition flex items-center gap-1.5" onclick="openGeminiModal()" title="Pengaturan AI Google Gemini">
+            <!-- Gemini AI Settings Modal Trigger with Live Status Indicator -->
+            <button class="text-xs bg-white/10 hover:bg-white/20 text-white font-semibold px-3 py-2 rounded-xl border border-white/20 transition flex items-center gap-2" onclick="openGeminiModal()" title="Pengaturan & Status Integrasi AI Google Gemini">
+                <span id="gemini-status-dot" class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-xs inline-block transition-all"></span>
                 <i class="fa-solid fa-brain text-brand-coral"></i>
                 <span class="hidden sm:inline">AI Gemini</span>
+                <span id="gemini-status-text" class="text-[10px] bg-white/15 px-1.5 py-0.5 rounded text-purple-100 hidden md:inline">Cek...</span>
             </button>
 
             <!-- Demo Rapat AI -->
@@ -752,7 +754,7 @@
                             <p class="text-[10px] text-purple-200">Log Dialog &amp; Verifikasi Suara</p>
                         </div>
                     </div>
-                    <span class="text-[11px] bg-white/20 px-2.5 py-0.5 rounded-full font-mono text-brand-cream font-bold" id="diarization-speaker-count">4 Pembicara</span>
+                    <span class="text-[11px] bg-white/20 px-2.5 py-0.5 rounded-full font-mono text-brand-cream font-bold" id="diarization-speaker-count">0 Pembicara</span>
                 </div>
 
                 <div class="p-3 bg-purple-50/50 border-b border-purple-100 flex items-center justify-between text-xs">
@@ -760,51 +762,19 @@
                         <span class="text-[11px] font-bold text-slate-600 mr-1">Filter:</span>
                         <button class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-brand-purple text-white" id="filter-all-btn" onclick="filterDiarization('all')">Semua</button>
                         <button class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-brand-cream text-[#783009] border border-[#f5c697] flex items-center gap-1" id="filter-unclear-btn" onclick="filterDiarization('unclear')">
-                            <i class="fa-solid fa-triangle-exclamation text-brand-coral text-[9px]"></i> Perlu Verifikasi (<span id="unclear-filter-count">2</span>)
+                            <i class="fa-solid fa-triangle-exclamation text-brand-coral text-[9px]"></i> Perlu Verifikasi (<span id="unclear-filter-count">0</span>)
                         </button>
                     </div>
-                    <button onclick="triggerAISummarization()" class="text-[11px] text-brand-purple font-bold hover:underline">
+                    <button onclick="triggerAISummarization()" class="text-[11px] text-brand-purple font-bold hover:underline" title="Proses Ulang Ringkasan AI">
                         <i class="fa-solid fa-arrows-rotate"></i>
                     </button>
                 </div>
 
                 <div class="p-3 space-y-3 max-h-[580px] overflow-y-auto" id="diarization-list">
-                    <div class="diarization-item p-3 bg-purple-50/70 border border-purple-100 rounded-xl space-y-1.5 transition hover:shadow-xs" data-status="ok">
-                        <div class="flex items-center justify-between text-xs font-bold text-brand-purple">
-                            <span>Drs. H. Ahmad Fauzi, S.H., M.H. (Pimpinan Rapat)</span>
-                            <span class="text-[11px] font-mono text-slate-500 bg-white px-1.5 py-0.5 rounded border border-purple-100">00:45</span>
-                        </div>
-                        <p class="text-xs text-slate-700 leading-relaxed">Membuka rapat evaluasi kinerja triwulan dan mengarahkan fokus ke kestabilan server pelayanan publik menjelang peluncuran aplikasi terpadu.</p>
-                    </div>
-
-                    <div class="diarization-item p-3 bg-brand-cream/60 border border-[#f5c697] rounded-xl space-y-2 transition hover:shadow-xs" data-status="unclear">
-                        <div class="flex items-center justify-between text-xs font-bold text-[#783009]">
-                            <span>Hendra Wijaya (Tim Teknis)</span>
-                            <span class="text-[10px] font-mono bg-brand-coral text-white px-2 py-0.5 rounded-full font-bold shadow-xs">04:18 ⚠️ Kurang Jelas</span>
-                        </div>
-                        <p class="text-xs text-slate-700 leading-relaxed">Menyarankan penambahan alokasi RAM server cluster database sebesar <span class="unclear-marker" onclick="editMarkerText(this)">[⚠️ Suara Kurang Jelas: "...64 GB atau 128 GB..."]</span> agar tidak bottleneck.</p>
-                        <div class="flex items-center gap-2 pt-1 border-t border-[#f5c697]/50 text-[10px] text-slate-600">
-                            <span>Status: Menunggu Konfirmasi Angka</span>
-                        </div>
-                    </div>
-
-                    <div class="diarization-item p-3 bg-brand-cream/60 border border-[#f5c697] rounded-xl space-y-2 transition hover:shadow-xs" data-status="unclear">
-                        <div class="flex items-center justify-between text-xs font-bold text-[#783009]">
-                            <span>Siti Aminah, S.E. (Keuangan)</span>
-                            <span class="text-[10px] font-mono bg-brand-coral text-white px-2 py-0.5 rounded-full font-bold shadow-xs">06:50 ⚠️ Kurang Jelas</span>
-                        </div>
-                        <p class="text-xs text-slate-700 leading-relaxed">Alokasi pagu belanja pemeliharaan server e-Katalog masih tersedia berkisar <span class="unclear-marker" onclick="editMarkerText(this)">[⚠️ Suara Kurang Jelas: "...Rp45 juta atau Rp54 juta..."]</span>.</p>
-                        <div class="flex items-center gap-2 pt-1 border-t border-[#f5c697]/50 text-[10px] text-slate-600">
-                            <span>Status: Verifikasi Nota Anggaran Kasubbag</span>
-                        </div>
-                    </div>
-
-                    <div class="diarization-item p-3 bg-purple-50/70 border border-purple-100 rounded-xl space-y-1.5 transition hover:shadow-xs" data-status="ok">
-                        <div class="flex items-center justify-between text-xs font-bold text-brand-purple">
-                            <span>Budi Santoso, S.Kom. (Kabag TI)</span>
-                            <span class="text-[11px] font-mono text-slate-500 bg-white px-1.5 py-0.5 rounded border border-purple-100">09:15</span>
-                        </div>
-                        <p class="text-xs text-slate-700 leading-relaxed">Menyetujui eksekusi migrasi data dilakukan pada akhir pekan Sabtu malam agar tidak mengganggu transaksi operasional layanan publik persidangan.</p>
+                    <div id="diarization-empty" class="text-center py-10 px-4 text-slate-400 bg-purple-50/40 rounded-xl border border-dashed border-purple-200">
+                        <i class="fa-solid fa-microphone-lines text-3xl mb-2 text-brand-purple/40"></i>
+                        <p class="text-xs font-bold text-slate-600">Belum Ada Log Dialog Pembicara</p>
+                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Mulai rekam rapat atau unggah berkas rekaman di tab <strong>1. Rekam &amp; Rapat</strong> untuk memproses transkrip dialog secara otomatis.</p>
                     </div>
                 </div>
             </div>
@@ -876,7 +846,7 @@
                             <div>
                                 <h3 class="font-bold uppercase mb-1" style="font-size: 12pt; line-height: 1.5;">I. PEMBUKAAN DAN ARAHAN PIMPINAN</h3>
                                 <p class="leading-relaxed" style="text-indent: 28px; line-height: 1.5;" id="doc-section-1" contenteditable="true" oninput="autoSaveDraft()">
-                                    Rapat dibuka secara resmi pada pukul 09.00 WIB oleh Pimpinan Rapat. Disampaikan bahwa fokus rapat triwulan ini adalah percepatan respons server pelayanan masyarakat agar tidak terjadi antrean sistem pada jam kerja sibuk, serta memastikan integritas dan kepatuhan administrasi perkara peradilan.
+                                    Rapat dibuka secara resmi oleh Pimpinan Rapat. Dalam arahannya, Pimpinan menyampaikan pengantar pokok bahasan serta menegaskan tujuan dan sasaran yang hendak dicapai dalam pertemuan dinas ini.
                                 </p>
                             </div>
 
@@ -884,15 +854,8 @@
                                 <h3 class="font-bold uppercase mb-1.5" style="font-size: 12pt; line-height: 1.5;">II. PEMBAHASAN DAN TANGGAPAN PEMBICARA</h3>
                                 <div id="doc-section-2" contenteditable="true" oninput="autoSaveDraft()">
                                     <ol class="list-decimal pl-6 space-y-2" style="line-height: 1.5;">
-                                        <li style="line-height: 1.5;">
-                                            <strong>Budi Santoso, S.Kom. (Kabag TI):</strong> Lonjakan trafik mencapai 240% pada jam kerja pagi, tim membutuhkan tambahan kapasitas RAM database cluster.
-                                        </li>
-                                        <li style="line-height: 1.5;">
-                                            <strong>Hendra Wijaya (Tim Teknis):</strong> Mengusulkan penambahan alokasi memori cluster sebesar <span class="unclear-marker" onclick="editMarkerText(this)">[⚠️ Suara Kurang Jelas - Menit 04:18: "64 GB atau 128 GB"]</span> di luar jam operasional pelayanan.
-                                        </li>
-                                        <li style="line-height: 1.5;">
-                                            <strong>Siti Aminah, S.E. (Keuangan):</strong> Belanja pemeliharaan e-Katalog mencukupi dengan estimasi pagu <span class="unclear-marker" onclick="editMarkerText(this)">[⚠️ Suara Kurang Jelas - Menit 06:50: "Rp45.000.000 atau Rp54.000.000"]</span>.
-                                        </li>
+                                        <li style="line-height: 1.5;">Pemaparan materi pokok bahasan rapat sesuai agenda yang telah ditetapkan oleh pimpinan rapat.</li>
+                                        <li style="line-height: 1.5;">Tanggapan, masukan, dan saran teknis dari para peserta rapat yang hadir untuk merumuskan langkah tindak lanjut.</li>
                                     </ol>
                                 </div>
                             </div>
@@ -901,15 +864,8 @@
                                 <h3 class="font-bold uppercase mb-1.5" style="font-size: 12pt; line-height: 1.5;">III. KEPUTUSAN DAN KESIMPULAN RAPAT</h3>
                                 <div id="doc-section-3" contenteditable="true" oninput="autoSaveDraft()">
                                     <ol class="list-decimal pl-6 space-y-2" style="line-height: 1.5;">
-                                        <li style="line-height: 1.5;">
-                                            Menyetujui peningkatan kapasitas alokasi memori cluster server dan optimasi indeks database Sistem Informasi Penelusuran Perkara (SIPP).
-                                        </li>
-                                        <li style="line-height: 1.5;">
-                                            Penyesuaian pagu anggaran belanja pemeliharaan TI melalui pengadaan e-Katalog LKPP oleh Pejabat Pembuat Komitmen (PPK).
-                                        </li>
-                                        <li style="line-height: 1.5;">
-                                            Jadwal pelaksanaan migrasi database ditetapkan pada Sabtu malam pukul 22.00 WIB untuk menghindari potensi gangguan pada operasional persidangan.
-                                        </li>
+                                        <li style="line-height: 1.5;">Menyetujui dan menetapkan hasil kesepakatan pembahasan agenda rapat sebagaimana tertuang dalam notulen ini.</li>
+                                        <li style="line-height: 1.5;">Seluruh unit kerja dan pejabat terkait diinstruksikan untuk berkoordinasi secara aktif guna memastikan hasil rapat terlaksana secara optimal.</li>
                                     </ol>
                                 </div>
                             </div>
@@ -929,21 +885,9 @@
                                         <tbody>
                                             <tr>
                                                 <td class="border border-black/70 p-1.5 text-center">1</td>
-                                                <td class="border border-black/70 p-1.5">Penyusunan telaah staf revisi spesifikasi server</td>
-                                                <td class="border border-black/70 p-1.5">Kabag TI &amp; Tim Teknis</td>
-                                                <td class="border border-black/70 p-1.5 text-center">31 Okt 2026</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="border border-black/70 p-1.5 text-center">2</td>
-                                                <td class="border border-black/70 p-1.5">Koordinasi pengadaan e-Katalog LKPP</td>
-                                                <td class="border border-black/70 p-1.5">Pejabat Pembuat Komitmen</td>
-                                                <td class="border border-black/70 p-1.5 text-center">05 Nov 2026</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="border border-black/70 p-1.5 text-center">3</td>
-                                                <td class="border border-black/70 p-1.5">Eksekusi migrasi &amp; uji beban server baru</td>
-                                                <td class="border border-black/70 p-1.5">Pranata Komputer</td>
-                                                <td class="border border-black/70 p-1.5 text-center">08 Nov 2026</td>
+                                                <td class="border border-black/70 p-1.5">Pelaksanaan tindak lanjut hasil keputusan rapat</td>
+                                                <td class="border border-black/70 p-1.5">Unit Kerja Terkait</td>
+                                                <td class="border border-black/70 p-1.5 text-center">Sesuai Jadwal</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -1053,8 +997,22 @@
         </div>
 
         <div class="p-5 space-y-4">
+            <!-- STATUS KONEKSI AKTIF (VERCEL / CLIENT KEY) -->
+            <div id="gemini-connection-card" class="p-3 rounded-xl border text-xs flex items-center justify-between transition-all bg-slate-50 border-slate-200 text-slate-700">
+                <div class="flex items-center gap-2.5">
+                    <span id="gemini-card-dot" class="w-3 h-3 rounded-full bg-slate-400"></span>
+                    <div>
+                        <div id="gemini-card-title" class="font-bold text-slate-800">Memeriksa Status Koneksi AI...</div>
+                        <div id="gemini-card-desc" class="text-[11px] text-slate-500">Mengecek koneksi Vercel &amp; kunci tersimpan</div>
+                    </div>
+                </div>
+                <button type="button" onclick="checkGeminiConnectionStatus(true)" class="text-[11px] text-brand-purple font-bold hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+            </div>
+
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Google Gemini API Key</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Google Gemini API Key (Peramban / Kunci Pribadi)</label>
                 <div class="relative">
                     <input type="password" id="gemini-api-key" placeholder="AIzaSy..." class="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple font-mono"/>
                     <button type="button" onclick="toggleApiKeyVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
@@ -1062,36 +1020,37 @@
                     </button>
                 </div>
                 <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
-                    Kunci disimpan secara privat di peramban Anda. Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-brand-purple font-bold underline">Google AI Studio</a>.
+                    Kunci disimpan secara privat di peramban Anda. Dapatkan kunci gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-brand-purple font-bold underline">Google AI Studio</a>.
                 </p>
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Pilihan Model Gemini</label>
                 <select id="gemini-model-select" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-brand-purple">
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Sangat Cepat &amp; Presisi)</option>
-                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen)</option>
-                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Analisis Kompleks)</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Sangat Cepat &amp; Presisi - Direkomendasikan)</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen Terbaru)</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Analisis Kompleks &amp; Mendalam)</option>
                 </select>
             </div>
 
-            <div class="p-3 bg-brand-cream-light rounded-xl border border-brand-cream text-xs text-slate-700 space-y-1">
+            <!-- CARA KONEKSI VERCEL (GLOBAL UNTUK SEMUA PERANGKAT) -->
+            <div class="p-3 bg-purple-50/70 rounded-xl border border-purple-200 text-xs text-slate-700 space-y-1.5">
                 <div class="font-bold text-brand-purple flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-info text-brand-coral"></i>
-                    <span>Mode Offline &amp; Smart Fallback</span>
+                    <i class="fa-solid fa-cloud-arrow-up text-brand-coral"></i>
+                    <span>Koneksi Serverless Cloud (Vercel)</span>
                 </div>
-                <p class="text-[11px] leading-relaxed">
-                    Jika tanpa API Key, KlikNotulen tetap bekerja dengan <strong>Local Heuristic Smart Engine</strong> untuk mengelompokkan pembicara dan membuat draft notulen.
+                <p class="text-[11px] text-slate-600 leading-relaxed">
+                    Anda juga dapat memasang API Key di dashboard Vercel: Masuk ke menu <strong>Settings &gt; Environment Variables</strong>, isi Key: <code class="bg-white px-1 py-0.5 rounded border border-purple-200 font-bold text-brand-purple">GEMINI_API_KEY</code> dengan Value kunci Anda. Jika sudah, seluruh laptop dan HP otomatis terhubung tanpa perlu memasukkan kunci satu per satu!
                 </p>
             </div>
 
             <div class="pt-2 flex items-center justify-between gap-3">
                 <button onclick="testGeminiConnection()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
                     <i class="fa-solid fa-plug text-brand-coral"></i>
-                    <span>Uji Koneksi</span>
+                    <span>Uji Koneksi AI</span>
                 </button>
                 <div class="flex items-center gap-2">
-                    <button onclick="clearGeminiKey()" class="px-3 py-2 text-rose-600 hover:bg-rose-50 text-xs font-semibold rounded-xl transition">Hapus</button>
+                    <button onclick="clearGeminiKey()" class="px-3 py-2 text-rose-600 hover:bg-rose-50 text-xs font-semibold rounded-xl transition">Hapus Kunci</button>
                     <button onclick="saveGeminiSettings()" class="px-4 py-2 bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-bold rounded-xl shadow-md transition">Simpan Pengaturan</button>
                 </div>
             </div>
@@ -1747,6 +1706,88 @@
     /* --------------------------------------------------------------------------
        LANGKAH 3: AI SPEECH-TO-TEXT & RANGKUMAN (GEMINI API / SMART ENGINE)
        -------------------------------------------------------------------------- */
+    let isGeminiConnected = false;
+    let geminiConnectionSource = 'none'; // 'vercel' | 'client' | 'none'
+
+    async function checkGeminiConnectionStatus(showToastFeedback = false) {
+        const clientKey = (localStorage.getItem('kliknotulen_gemini_key') || '').trim();
+
+        // 1. Cek Client Key jika tersimpan di localStorage
+        if (clientKey) {
+            setGeminiConnectedState('client', 'Kunci Pribadi Tersimpan', 'API Key tersimpan secara privat di peramban ini.');
+            if (showToastFeedback) showToast('AI Gemini terhubung dengan Kunci Pribadi Peramban!', 'success');
+            return true;
+        }
+
+        // 2. Cek endpoint Vercel Serverless /api/gemini
+        try {
+            const res = await fetch('/api/gemini', { method: 'GET' });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.hasServerKey) {
+                    setGeminiConnectedState('vercel', 'Serverless Vercel Aktif', 'Terkoneksi via GEMINI_API_KEY di dashboard Vercel.');
+                    if (showToastFeedback) showToast('AI Gemini terhubung via Serverless Vercel Cloud!', 'success');
+                    return true;
+                }
+            }
+        } catch(e) {
+            // Berjalan secara statis atau offline
+        }
+
+        // 3. Belum terhubung
+        setGeminiConnectedState('none', 'Belum Terhubung', 'Masukkan API Key di bawah atau atur GEMINI_API_KEY di Vercel.');
+        if (showToastFeedback) showToast('AI Gemini belum terhubung. Silakan masukkan API Key.', 'info');
+        return false;
+    }
+
+    function setGeminiConnectedState(source, title, desc) {
+        geminiConnectionSource = source;
+        isGeminiConnected = (source !== 'none');
+
+        const statusDot = document.getElementById('gemini-status-dot');
+        const statusText = document.getElementById('gemini-status-text');
+        const cardDot = document.getElementById('gemini-card-dot');
+        const cardTitle = document.getElementById('gemini-card-title');
+        const cardDesc = document.getElementById('gemini-card-desc');
+        const connCard = document.getElementById('gemini-connection-card');
+
+        if (isGeminiConnected) {
+            if (statusDot) {
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] inline-block animate-pulse';
+            }
+            if (statusText) {
+                statusText.innerText = source === 'vercel' ? 'Vercel Aktif' : 'Terhubung';
+                statusText.className = 'text-[10px] bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 px-1.5 py-0.5 rounded font-semibold hidden md:inline';
+            }
+            if (cardDot) cardDot.className = 'w-3 h-3 rounded-full bg-emerald-500 shadow-sm';
+            if (cardTitle) {
+                cardTitle.innerText = `🟢 Terhubung (${title})`;
+                cardTitle.className = 'font-bold text-emerald-800';
+            }
+            if (cardDesc) cardDesc.innerText = desc;
+            if (connCard) {
+                connCard.className = 'p-3 rounded-xl border text-xs flex items-center justify-between transition-all bg-emerald-50 border-emerald-200 text-emerald-900';
+            }
+        } else {
+            if (statusDot) {
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 shadow-xs inline-block';
+            }
+            if (statusText) {
+                statusText.innerText = 'Belum Konek';
+                statusText.className = 'text-[10px] bg-rose-500/20 text-rose-200 border border-rose-400/30 px-1.5 py-0.5 rounded font-semibold hidden md:inline';
+            }
+            if (cardDot) cardDot.className = 'w-3 h-3 rounded-full bg-rose-500';
+            if (cardTitle) {
+                cardTitle.innerText = '🔴 Belum Terhubung ke Google AI';
+                cardTitle.className = 'font-bold text-rose-700';
+            }
+            if (cardDesc) cardDesc.innerText = desc;
+            if (connCard) {
+                connCard.className = 'p-3 rounded-xl border text-xs flex items-center justify-between transition-all bg-rose-50 border-rose-200 text-rose-900';
+            }
+        }
+    }
+
     function openGeminiModal() {
         const modal = document.getElementById('modal-gemini');
         const keyInput = document.getElementById('gemini-api-key');
@@ -1758,6 +1799,8 @@
         if (keyInput) keyInput.value = savedKey;
         if (modelSelect) modelSelect.value = savedModel;
         if (modal) modal.classList.remove('hidden');
+
+        checkGeminiConnectionStatus(false);
     }
 
     function closeGeminiModal() {
@@ -1779,134 +1822,259 @@
 
     function saveGeminiSettings() {
         const key = document.getElementById('gemini-api-key')?.value.trim();
-        const model = document.getElementById('gemini-model-select')?.value;
+        const model = document.getElementById('gemini-model-select')?.value || 'gemini-1.5-flash';
         if (key) {
             localStorage.setItem('kliknotulen_gemini_key', key);
             localStorage.setItem('kliknotulen_gemini_model', model);
             showToast('Kunci API Gemini berhasil disimpan.', 'success');
         } else {
             localStorage.removeItem('kliknotulen_gemini_key');
-            showToast('Kunci API Gemini dikosongkan. Beralih ke Local Smart Engine.', 'info');
+            localStorage.setItem('kliknotulen_gemini_model', model);
+            showToast('Kunci API Gemini dikosongkan.', 'info');
         }
+        checkGeminiConnectionStatus(true);
         closeGeminiModal();
     }
 
     function clearGeminiKey() {
-        document.getElementById('gemini-api-key').value = '';
+        const keyInput = document.getElementById('gemini-api-key');
+        if (keyInput) keyInput.value = '';
         localStorage.removeItem('kliknotulen_gemini_key');
-        showToast('Kunci API dihapus.', 'info');
+        checkGeminiConnectionStatus(true);
+        showToast('Kunci API lokal dihapus.', 'info');
     }
 
     async function testGeminiConnection() {
-        const key = document.getElementById('gemini-api-key')?.value.trim();
-        if (!key) {
-            alert('Silakan masukkan Google Gemini API Key terlebih dahulu.');
-            return;
+        const inputKey = document.getElementById('gemini-api-key')?.value.trim();
+        showToast('Menguji koneksi ke Google Gemini AI...', 'info');
+
+        // Jika input key diisi, tes key tersebut secara langsung
+        if (inputKey) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${inputKey}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Tes koneksi. Jawab hanya: OK" }] }]
+                    })
+                });
+
+                if (res.ok) {
+                    localStorage.setItem('kliknotulen_gemini_key', inputKey);
+                    checkGeminiConnectionStatus(false);
+                    alert('Berhasil! Kunci API Google Gemini valid dan siap digunakan.');
+                    showToast('Koneksi Google Gemini Sukses! Kunci disimpan.', 'success');
+                    return;
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(`Koneksi Gagal: ${err.error?.message || 'Kunci API tidak valid. Periksa kembali kunci dari Google AI Studio.'}`);
+                    return;
+                }
+            } catch(e) {
+                alert('Gagal menghubungi endpoint Google Gemini. Periksa koneksi internet Anda.');
+                return;
+            }
         }
 
-        showToast('Menguji koneksi ke Google Gemini AI...', 'info');
+        // Jika input key kosong, tes endpoint /api/gemini Vercel
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
-            const res = await fetch(url, {
+            const res = await fetch('/api/gemini', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Tes koneksi. Jawab hanya 'OK'." }] }]
+                    prompt: "Tes koneksi. Jawab JSON: {\"status\": \"ok\"}"
                 })
             });
 
             if (res.ok) {
-                showToast('Koneksi Gemini AI Berhasil Terhubung! Siap digunakan.', 'success');
+                checkGeminiConnectionStatus(false);
+                alert('Berhasil! Serverless Vercel GEMINI_API_KEY aktif dan merespons dengan normal.');
+                showToast('Koneksi Vercel GEMINI_API_KEY Sukses!', 'success');
+                return;
             } else {
-                const err = await res.json();
-                alert(`Koneksi Gagal: ${err.error?.message || 'Periksa kembali API Key Anda.'}`);
+                const err = await res.json().catch(() => ({}));
+                if (err.error === 'API_KEY_MISSING') {
+                    alert('Kunci API belum diatur.\n\nSilakan:\n1. Masukkan API Key di kolom input di atas, atau\n2. Atur GEMINI_API_KEY di dashboard Vercel (Settings > Environment Variables).');
+                } else {
+                    alert(`Koneksi Gagal: ${err.message || 'Periksa konfigurasi GEMINI_API_KEY di Vercel.'}`);
+                }
             }
         } catch(e) {
-            alert('Gagal menghubungi endpoint Google Gemini. Periksa koneksi internet Anda.');
+            alert('Gagal menghubungi server. Masukkan API Key di kolom input di atas untuk koneksi langsung peramban.');
         }
     }
 
     async function triggerAISummarization(transcriptToUse = null) {
-        showToast('Menganalisis audio & menyusun notulen resmi...', 'info');
+        showToast('Menganalisis data rapat & menyusun notulen resmi...', 'info');
 
-        const apiKey = localStorage.getItem('kliknotulen_gemini_key');
-        const agenda = document.getElementById('meta-agenda')?.value || '';
-        const peserta = document.getElementById('meta-peserta')?.value || '';
+        const agenda = document.getElementById('meta-agenda')?.value || 'Rapat Dinas';
+        const pimpinan = document.getElementById('doc-view-pimpinan')?.innerText || document.getElementById('ttd-pimpinan-nama')?.value || 'Pimpinan Rapat';
+        const peserta = document.getElementById('meta-peserta')?.value || 'Seluruh Peserta Rapat';
+        const transcript = transcriptToUse || liveTranscript || '';
 
-        // If Gemini API Key exists, use Google Gemini AI
-        if (apiKey) {
+        const clientKey = (localStorage.getItem('kliknotulen_gemini_key') || '').trim();
+        const model = localStorage.getItem('kliknotulen_gemini_model') || 'gemini-1.5-flash';
+
+        let geminiSuccess = false;
+
+        // A. Coba panggil endpoint serverless /api/gemini terlebih dahulu (mendukung server Vercel atau client key)
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (clientKey) headers['x-gemini-key'] = clientKey;
+
+            const res = await fetch('/api/gemini', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    agenda,
+                    pimpinan,
+                    peserta,
+                    transcript,
+                    model
+                })
+            });
+
+            if (res.ok) {
+                const result = await res.json();
+                if (result.success && result.data) {
+                    applySummarizationToDOM(result.data);
+                    showToast('Notulen berhasil disusun otomatis oleh AI Gemini!', 'success');
+                    geminiSuccess = true;
+                    return;
+                }
+            } else {
+                const errJson = await res.json().catch(() => ({}));
+                console.warn('/api/gemini response:', res.status, errJson);
+            }
+        } catch (apiErr) {
+            console.warn('Gagal memanggil /api/gemini:', apiErr);
+        }
+
+        // B. Jika /api/gemini gagal atau offline, coba direct fetch ke Google API jika ada clientKey
+        if (!geminiSuccess && clientKey) {
             try {
-                const model = localStorage.getItem('kliknotulen_gemini_model') || 'gemini-1.5-flash';
-                const prompt = `Anda adalah notulis profesional di Pengadilan Agama Lumajang.
-Berdasarkan konteks rapat:
-- Agenda: ${agenda}
-- Peserta: ${peserta}
+                const prompt = `Anda adalah notulis dinas resmi profesional pemerintah dan peradilan Indonesia.
+Susun naskah notulen rapat resmi berdasarkan data berikut:
+- Agenda Rapat: ${agenda}
+- Pimpinan Rapat: ${pimpinan}
+- Peserta Hadir: ${peserta}
 - Transkrip Percakapan Rapat:
-"${transcriptToUse || liveTranscript || 'Rapat koordinasi evaluasi infrastruktur server dan percepatan pelayanan publik peradilan digital...'}"
+"""
+${transcript || 'Rapat dibuka oleh pimpinan, dilanjutkan dengan pembahasan agenda serta masukan dari peserta hadir.'}
+"""
 
-Hasilkan data JSON dengan struktur persis berikut:
+Instruksi:
+1. Jangan membuat naskah fiktif tentang IT cluster server atau RAM jika tidak dibahas di transkrip.
+2. Gunakan Bahasa Indonesia formal baku (Arial 12pt format dinas).
+3. Hasilkan HANYA JSON murni tanpa markdown:
 {
-    "pembukaan": "Teks paragraf narasi pembukaan dan arahan ketua rapat (Arial 12pt format dinas)",
-    "pembahasan_poin": ["Nama Pembicara 1: Poin inti", "Nama Pembicara 2: Poin inti dengan tanda verifikasi jika ada angka ragu"],
-    "keputusan_poin": ["Poin keputusan rapat 1", "Poin keputusan rapat 2"],
-    "tindak_lanjut": [
-        {"kegiatan": "Uraian tugas", "pic": "Penanggung jawab", "deadline": "Tanggal"}
-    ],
-    "diarization": [
-        {"nama": "Nama Pejabat", "waktu": "00:45", "status": "ok", "teks": "Ringkasan tanggapan"}
-    ]
-}
-Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
+  "pembukaan": "Teks paragraf narasi pembukaan dan arahan ketua rapat secara formal dan lengkap.",
+  "pembahasan_poin": [
+    "<strong>Nama/Jabatan Pembicara:</strong> Pokok pembahasan yang disampaikan",
+    "<strong>Nama/Jabatan Pembicara:</strong> Pokok bahasan kedua"
+  ],
+  "keputusan_poin": [
+    "Poin keputusan rapat yang disepakati 1",
+    "Poin keputusan rapat yang disepakati 2"
+  ],
+  "tindak_lanjut": [
+    {"kegiatan": "Uraian tugas tindak lanjut", "pic": "Pejabat/Unit Penanggung Jawab", "deadline": "Target Waktu"}
+  ],
+  "diarization": [
+    {"nama": "Nama Pembicara", "waktu": "00:45", "status": "ok", "teks": "Ringkasan tanggapan"}
+  ]
+}`;
 
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${clientKey}`;
                 const res = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.2, topP: 0.8 }
+                    })
                 });
 
                 if (res.ok) {
                     const data = await res.json();
                     let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                    rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+                    const firstBrace = rawText.indexOf('{');
+                    const lastBrace = rawText.lastIndexOf('}');
+                    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                        rawText = rawText.substring(firstBrace, lastBrace + 1);
+                    }
                     const parsed = JSON.parse(rawText);
-
                     applySummarizationToDOM(parsed);
                     showToast('Notulen berhasil dirangkum dengan kecerdasan Gemini AI!', 'success');
                     return;
                 }
-            } catch(e) {
-                console.warn('Gemini API Error / Parsing Error, beralih ke Smart Heuristics:', e);
+            } catch(directErr) {
+                console.warn('Direct Gemini API call failed:', directErr);
             }
         }
 
-        // Smart Local Heuristic Engine Fallback
-        runLocalSmartSummarizer();
+        // C. Fallback: Local Smart Engine yang dinamis sesuai agenda pengguna (tanpa data palsu cluster database)
+        runLocalSmartSummarizer(agenda, pimpinan, peserta, transcript);
     }
 
-    function runLocalSmartSummarizer() {
-        // High quality legal court minutes simulation for Pengadilan Agama Lumajang
+    function runLocalSmartSummarizer(agendaArg, pimpinanArg, pesertaArg, transcriptArg) {
+        const agenda = agendaArg || document.getElementById('meta-agenda')?.value || 'Rapat Dinas';
+        const pimpinan = pimpinanArg || document.getElementById('doc-view-pimpinan')?.innerText || document.getElementById('ttd-pimpinan-nama')?.value || 'Pimpinan Rapat';
+        const peserta = pesertaArg || document.getElementById('meta-peserta')?.value || 'Seluruh Peserta Hadir';
+        const transcript = transcriptArg || liveTranscript || '';
+
+        let pembahasanList = [];
+        let diarizationList = [];
+
+        if (transcript && transcript.trim().length > 15) {
+            const sentences = transcript.split(/[.!?\n]+/).map(s => s.trim()).filter(s => s.length > 5);
+            if (sentences.length > 0) {
+                sentences.slice(0, 4).forEach((s, idx) => {
+                    pembahasanList.push(`<strong>Peserta Rapat ${idx + 1}:</strong> ${s}.`);
+                    diarizationList.push({
+                        nama: `Peserta Rapat ${idx + 1}`,
+                        waktu: `0${idx + 1}:15`,
+                        status: 'ok',
+                        teks: s
+                    });
+                });
+            }
+        }
+
+        if (pembahasanList.length === 0) {
+            pembahasanList = [
+                `<strong>Pimpinan Rapat (${pimpinan}):</strong> Memaparkan pokok agenda <em>${agenda}</em> serta mengarahkan fokus pembahasan pada pencapaian sasaran kerja yang akuntabel.`,
+                `<strong>Peserta Rapat:</strong> Menyampaikan masukan teknis dan saran operasional terkait pelaksanaan agenda <em>${agenda}</em> agar dapat terlaksana secara optimal.`
+            ];
+        }
+
         const parsed = {
-            pembukaan: "Rapat dibuka secara resmi pada pukul 09.00 WIB oleh Pimpinan Rapat. Disampaikan bahwa fokus rapat triwulan ini adalah percepatan respons server pelayanan masyarakat agar tidak terjadi antrean sistem pada jam kerja sibuk, serta memastikan integritas dan kepatuhan administrasi perkara peradilan.",
-            pembahasan_poin: [
-                "<strong>Budi Santoso, S.Kom. (Kabag TI):</strong> Lonjakan trafik mencapai 240% pada jam kerja pagi, tim membutuhkan tambahan kapasitas RAM database cluster.",
-                "<strong>Hendra Wijaya (Tim Teknis):</strong> Mengusulkan penambahan alokasi memori cluster sebesar <span class='unclear-marker' onclick='editMarkerText(this)'>[⚠️ Suara Kurang Jelas - Menit 04:18: '64 GB atau 128 GB']</span> di luar jam operasional pelayanan.",
-                "<strong>Siti Aminah, S.E. (Keuangan):</strong> Belanja pemeliharaan e-Katalog mencukupi dengan estimasi pagu <span class='unclear-marker' onclick='editMarkerText(this)'>[⚠️ Suara Kurang Jelas - Menit 06:50: 'Rp45.000.000 atau Rp54.000.000']</span>."
-            ],
+            pembukaan: `Rapat mengenai <strong>${agenda}</strong> dibuka secara resmi oleh Pimpinan Rapat (${pimpinan}). Dalam pengarahannya, Pimpinan menyampaikan tujuan rapat serta menegaskan komitmen seluruh jajaran yang hadir (${peserta}) untuk menyelesaikan seluruh agenda pembahasan secara tertib, terarah, dan berdaya guna.`,
+            pembahasan_poin: pembahasanList,
             keputusan_poin: [
-                "Menyetujui peningkatan kapasitas alokasi memori cluster server dan optimasi indeks database Sistem Informasi Penelusuran Perkara (SIPP).",
-                "Penyesuaian pagu anggaran belanja pemeliharaan TI melalui pengadaan e-Katalog LKPP oleh Pejabat Pembuat Komitmen (PPK).",
-                "Jadwal pelaksanaan migrasi database ditetapkan pada Sabtu malam pukul 22.00 WIB untuk menghindari potensi gangguan pada operasional persidangan."
+                `Menyetujui dan menetapkan seluruh kesepakatan rapat terkait pelaksanaan agenda ${agenda}.`,
+                `Menginstruksikan kepada seluruh unit kerja dan pejabat terkait untuk segera menindaklanjuti hasil keputusan rapat secara terkoordinasi.`,
+                `Menjadwalkan koordinasi dan evaluasi berkala guna memantau perkembangan pelaksanaan hasil rapat.`
             ],
             tindak_lanjut: [
-                { kegiatan: "Penyusunan telaah staf revisi spesifikasi server", pic: "Kabag TI & Tim Teknis", deadline: "31 Okt 2026" },
-                { kegiatan: "Koordinasi pengadaan e-Katalog LKPP", pic: "Pejabat Pembuat Komitmen", deadline: "05 Nov 2026" },
-                { kegiatan: "Eksekusi migrasi & uji beban server baru", pic: "Pranata Komputer", deadline: "08 Nov 2026" }
-            ]
+                {
+                    kegiatan: `Sosialisasi dan tindak lanjut pelaksanaan hasil ${agenda}`,
+                    pic: "Unit Kerja Terkait",
+                    deadline: "1 Minggu Pasca Rapat"
+                },
+                {
+                    kegiatan: "Penyusunan laporan evaluasi perkembangan kepada Pimpinan",
+                    pic: "Penanggung Jawab Kegiatan",
+                    deadline: "Sesuai Jadwal"
+                }
+            ],
+            diarization: diarizationList
         };
 
         applySummarizationToDOM(parsed);
-        showToast('Notulen dirangkum dengan Local Smart Engine. Tambahkan API Key Gemini di Pengaturan AI untuk kualitas analitis mendalam.', 'info');
+        showToast('Notulen disusun dengan Local Smart Engine. Tambahkan API Key Gemini di menu "AI Gemini" untuk analisis AI mendalam.', 'info');
     }
 
     function applySummarizationToDOM(data) {
@@ -1957,6 +2125,35 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
             });
             html += '</tbody></table>';
             document.getElementById('doc-section-4').innerHTML = html;
+        }
+
+        // Perbarui Log Dialog Speaker Diarization jika disediakan oleh AI
+        if (data.diarization && Array.isArray(data.diarization) && data.diarization.length > 0) {
+            const diarList = document.getElementById('diarization-list');
+            if (diarList) {
+                let html = '';
+                let unclearCount = 0;
+                data.diarization.forEach(d => {
+                    const isUnclear = d.status === 'unclear';
+                    if (isUnclear) unclearCount++;
+                    html += `
+                        <div class="diarization-item p-3 ${isUnclear ? 'bg-brand-cream/60 border border-[#f5c697]' : 'bg-purple-50/70 border border-purple-100'} rounded-xl space-y-1.5 transition hover:shadow-xs" data-status="${d.status || 'ok'}">
+                            <div class="flex items-center justify-between text-xs font-bold ${isUnclear ? 'text-[#783009]' : 'text-brand-purple'}">
+                                <span>${d.nama}</span>
+                                <span class="text-[11px] font-mono ${isUnclear ? 'bg-brand-coral text-white' : 'text-slate-500 bg-white border border-purple-100'} px-1.5 py-0.5 rounded font-bold">${d.waktu || '00:00'}${isUnclear ? ' ⚠️ Kurang Jelas' : ''}</span>
+                            </div>
+                            <p class="text-xs text-slate-700 leading-relaxed">${d.teks}</p>
+                        </div>
+                    `;
+                });
+                diarList.innerHTML = html;
+
+                const spkCount = document.getElementById('diarization-speaker-count');
+                if (spkCount) spkCount.innerText = `${data.diarization.length} Pembicara`;
+
+                const uncBadge = document.getElementById('unclear-filter-count');
+                if (uncBadge) uncBadge.innerText = unclearCount;
+            }
         }
 
         autoSaveDraft();
@@ -2235,16 +2432,22 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
             }
         }
 
-        // 4. Muat Draf Naskah Berjalan jika ada
+        // 4. Muat Draf Naskah Berjalan jika ada (dengan sanitasi database contoh)
         const rawDraft = localStorage.getItem(STORAGE_KEYS.DRAFT);
         if (rawDraft) {
             try {
-                const draft = JSON.parse(rawDraft);
-                if (draft.sections) {
-                    if (draft.sections.s1) document.getElementById('doc-section-1').innerHTML = draft.sections.s1;
-                    if (draft.sections.s2) document.getElementById('doc-section-2').innerHTML = draft.sections.s2;
-                    if (draft.sections.s3) document.getElementById('doc-section-3').innerHTML = draft.sections.s3;
-                    if (draft.sections.s4) document.getElementById('doc-section-4').innerHTML = draft.sections.s4;
+                // Periksa apakah draft lama masih mengandung teks contoh cluster database
+                if (rawDraft.includes('cluster database') || rawDraft.includes('Hendra Wijaya') || rawDraft.includes('Budi Santoso') || rawDraft.includes('Siti Aminah')) {
+                    console.log('Membersihkan cache naskah contoh lama...');
+                    localStorage.removeItem(STORAGE_KEYS.DRAFT);
+                } else {
+                    const draft = JSON.parse(rawDraft);
+                    if (draft.sections) {
+                        if (draft.sections.s1) document.getElementById('doc-section-1').innerHTML = draft.sections.s1;
+                        if (draft.sections.s2) document.getElementById('doc-section-2').innerHTML = draft.sections.s2;
+                        if (draft.sections.s3) document.getElementById('doc-section-3').innerHTML = draft.sections.s3;
+                        if (draft.sections.s4) document.getElementById('doc-section-4').innerHTML = draft.sections.s4;
+                    }
                 }
             } catch(e) {
                 console.warn('Gagal memuat draft sections:', e);
@@ -2260,6 +2463,9 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
         // 6. Sinkronisasi Kop & TTD ke Naskah Cetak
         syncKopSurat();
         updateArchiveBadge();
+
+        // 7. Cek Status Koneksi Google Gemini AI
+        checkGeminiConnectionStatus();
     }
 
     function seedInitialHistoryIfEmpty() {
@@ -2600,16 +2806,51 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
         document.getElementById('meta-agenda').value = '';
         document.getElementById('meta-tanggal').value = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         
-        document.getElementById('doc-section-1').innerHTML = '<p class="leading-relaxed" style="text-indent: 28px; line-height: 1.5;">Rapat dibuka oleh Pimpinan Rapat. Disampaikan pokok pengarahan mengenai agenda hari ini...</p>';
-        document.getElementById('doc-section-2').innerHTML = '<ol class="list-decimal pl-6 space-y-2"><li style="line-height: 1.5;"><strong>Pembicara 1:</strong> Uraian pokok bahasan rapat dinas...</li></ol>';
-        document.getElementById('doc-section-3').innerHTML = '<ol class="list-decimal pl-6 space-y-2"><li style="line-height: 1.5;">Kesimpulan rapat dinas...</li></ol>';
-        document.getElementById('doc-section-4').innerHTML = '<p>Daftar tindak lanjut hasil rapat dinas.</p>';
+        document.getElementById('doc-section-1').innerHTML = '<p class="leading-relaxed" style="text-indent: 28px; line-height: 1.5;">Rapat dibuka secara resmi oleh Pimpinan Rapat. Dalam arahannya, Pimpinan menyampaikan pengantar pokok bahasan serta menegaskan tujuan dan sasaran yang hendak dicapai dalam pertemuan dinas ini.</p>';
+        document.getElementById('doc-section-2').innerHTML = '<ol class="list-decimal pl-6 space-y-2" style="line-height: 1.5;"><li style="line-height: 1.5;">Pemaparan materi pokok bahasan rapat sesuai agenda yang telah ditetapkan oleh pimpinan rapat.</li><li style="line-height: 1.5;">Tanggapan, masukan, dan saran teknis dari para peserta rapat yang hadir untuk merumuskan langkah tindak lanjut.</li></ol>';
+        document.getElementById('doc-section-3').innerHTML = '<ol class="list-decimal pl-6 space-y-2" style="line-height: 1.5;"><li style="line-height: 1.5;">Menyetujui dan menetapkan hasil kesepakatan pembahasan agenda rapat sebagaimana tertuang dalam notulen ini.</li><li style="line-height: 1.5;">Seluruh unit kerja dan pejabat terkait diinstruksikan untuk berkoordinasi secara aktif guna memastikan hasil rapat terlaksana secara optimal.</li></ol>';
+        document.getElementById('doc-section-4').innerHTML = `
+            <table class="w-full border-collapse border border-black/70 text-left my-2" style="font-size: 11pt; line-height: 1.4;">
+                <thead>
+                    <tr class="bg-slate-100 font-bold text-center">
+                        <th class="border border-black/70 p-1.5" style="width: 35px;">No</th>
+                        <th class="border border-black/70 p-1.5">Uraian Kegiatan Tindak Lanjut</th>
+                        <th class="border border-black/70 p-1.5" style="width: 140px;">Penanggung Jawab</th>
+                        <th class="border border-black/70 p-1.5" style="width: 110px;">Batas Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="border border-black/70 p-1.5 text-center">1</td>
+                        <td class="border border-black/70 p-1.5">Pelaksanaan tindak lanjut hasil keputusan rapat</td>
+                        <td class="border border-black/70 p-1.5">Unit Kerja Terkait</td>
+                        <td class="border border-black/70 p-1.5 text-center">Sesuai Jadwal</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
 
+        // Bersihkan daftar log dialog speaker diarization ke state bersih
+        const diarList = document.getElementById('diarization-list');
+        if (diarList) {
+            diarList.innerHTML = `
+                <div id="diarization-empty" class="text-center py-10 px-4 text-slate-400 bg-purple-50/40 rounded-xl border border-dashed border-purple-200">
+                    <i class="fa-solid fa-microphone-lines text-3xl mb-2 text-brand-purple/40"></i>
+                    <p class="text-xs font-bold text-slate-600">Belum Ada Log Dialog Pembicara</p>
+                    <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Mulai rekam rapat atau unggah berkas rekaman di tab <strong>1. Rekam &amp; Rapat</strong> untuk memproses transkrip dialog secara otomatis.</p>
+                </div>
+            `;
+        }
+        const spkCount = document.getElementById('diarization-speaker-count');
+        if (spkCount) spkCount.innerText = '0 Pembicara';
+        const uncCount = document.getElementById('unclear-filter-count');
+        if (uncCount) uncCount.innerText = '0';
+
+        localStorage.removeItem(STORAGE_KEYS.DRAFT);
         syncKopSurat();
-        autoSaveDraft();
         closeArchiveModal();
         switchTab('rekam');
-        showToast('Naskah notulen baru siap digunakan (Kop & TTD tetap tersimpan).', 'success');
+        showToast('Naskah notulen baru disiapkan bersih (Kop & TTD tetap tersimpan).', 'success');
     }
 
     function updateArchiveBadge() {
@@ -2723,8 +2964,13 @@ Keluarkan HANYA JSON murni tanpa markdown triple backticks.`;
     }
 
     function runSimulatedMeeting() {
-        showToast('Menjalankan Simulasi Demo Rapat Cerdas...', 'info');
-        triggerAISummarization();
+        showToast('Menjalankan Simulasi Notulen Rapat Cerdas...', 'info');
+        const agenda = document.getElementById('meta-agenda')?.value || 'Rapat Koordinasi Dinas';
+        const pimpinan = document.getElementById('doc-view-pimpinan')?.innerText || document.getElementById('ttd-pimpinan-nama')?.value || 'Pimpinan Rapat';
+        
+        const demoTranscript = `Rapat dinas dibuka secara resmi oleh Pimpinan Rapat (${pimpinan}) mengenai ${agenda}. Pembahasan diawali dengan penyampaian evaluasi capaian kerja dan pokok bahasan materi. Seluruh peserta rapat memberikan pandangan dan saran tindak lanjut demi terlaksananya target kerja secara efektif. Seluruh jajaran menyepakati kesimpulan rapat untuk dilaksanakan sesuai jadwal.`;
+        
+        triggerAISummarization(demoTranscript);
         switchTab('hasil');
     }
 

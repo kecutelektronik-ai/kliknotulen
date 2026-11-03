@@ -157,10 +157,20 @@ KlikNotulen dilengkapi dengan integrasi mutakhir **Google Gemini AI** untuk mera
 > **Keamanan Kunci Privat:**  
 > Kunci API Anda disimpan murni di peramban lokal Anda (*localStorage*) dan tidak pernah dikirim ke server pihak ketiga manapun selain langsung ke endpoint resmi Google Cloud.
 
-### 5.2 Mode Offline & Local Smart Fallback
+### 5.2 Sambungan Cloud Global via Vercel Environment Variables
+Bagi instansi/pengguna yang ingin agar **seluruh perangkat (laptop dan HP)** otomatis terhubung ke AI tanpa perlu memasukkan API key satu per satu di setiap browser:
+1. Buka dashboard [Vercel](https://vercel.com/) pada proyek `kliknotulen`.
+2. Masuk ke **Settings > Environment Variables**.
+3. Tambahkan variabel baru:
+   - **Key:** `GEMINI_API_KEY`
+   - **Value:** *(Tempelkan Kunci API Gemini Anda)*
+   - **Environments:** Centang *Production* dan *Preview*.
+4. Klik **Save**. Begitu disimpan, endpoint `/api/gemini` akan otomatis aktif, dan indikator tombol **AI Gemini** di aplikasi akan langsung menyala hijau 🟢 **Vercel Aktif** di seluruh perangkat yang membuka tautan aplikasi.
+
+### 5.3 Mode Offline & Local Smart Fallback
 Jika Anda tidak memiliki API Key Gemini atau perangkat sedang tidak terhubung ke internet:
 - KlikNotulen tetap dapat bekerja secara penuh menggunakan **Local Heuristic Smart Engine**.
-- Mesin lokal ini akan memecah pembicara berdasarkan jeda kalimat dan menyusun draft naskah notulen dinas secara otomatis tanpa kuota internet.
+- Mesin lokal ini menyusun draft naskah notulen dinas secara dinamis berdasarkan agenda dan data rapat aktual tanpa kuota internet.
 
 ---
 
