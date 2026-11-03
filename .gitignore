@@ -19,3 +19,6 @@ $RECYCLE.BIN/
 *.sln
 *.sw?
 
+
+.vercel
+.env*
